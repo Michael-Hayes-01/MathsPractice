@@ -1,0 +1,187 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+
+    <title>Mia's Maths Practice</title>
+
+    <style>
+        * {
+            box-sizing: border-box;
+        }
+
+        body {
+            font-family: Arial, sans-serif;
+            background: #f4f6f8;
+            margin: 0;
+            min-height: 100vh;
+
+            display: flex;
+            justify-content: center;
+            align-items: center;
+        }
+
+        .container {
+            background: white;
+            width: 90%;
+            max-width: 650px;
+
+            padding: 40px;
+
+            border-radius: 16px;
+
+            box-shadow:
+                0 5px 20px rgba(0, 0, 0, 0.12);
+
+            text-align: center;
+        }
+
+        h1 {
+            margin-top: 0;
+            margin-bottom: 10px;
+
+            color: #333;
+            font-size: 36px;
+        }
+
+        .subtitle {
+            color: #666;
+            font-size: 18px;
+
+            margin-bottom: 35px;
+        }
+
+        .links {
+            display: flex;
+            flex-direction: column;
+            gap: 15px;
+        }
+
+        .link-button {
+            display: block;
+
+            padding: 18px 20px;
+
+            border-radius: 10px;
+
+            background: #333;
+            color: white;
+
+            text-decoration: none;
+
+            font-size: 22px;
+            font-weight: bold;
+
+            transition:
+                transform 0.15s ease,
+                background 0.15s ease;
+        }
+
+        .link-button:hover {
+            background: #555;
+            transform: scale(1.02);
+        }
+
+        .link-button:active {
+            transform: scale(0.98);
+        }
+
+        .description {
+            display: block;
+
+            margin-top: 5px;
+
+            font-size: 14px;
+            font-weight: normal;
+
+            opacity: 0.8;
+        }
+
+        .footer {
+            margin-top: 30px;
+
+            color: #999;
+            font-size: 14px;
+        }
+
+        @media (max-width: 600px) {
+
+            .container {
+                padding: 30px 20px;
+            }
+
+            h1 {
+                font-size: 30px;
+            }
+
+            .link-button {
+                font-size: 19px;
+                padding: 16px;
+            }
+        }
+    </style>
+</head>
+
+<body>
+
+    <div class="container">
+
+        <h1>🧮 Mia's Maths Practice</h1>
+
+        <div class="subtitle">
+            Choose a practice activity
+        </div>
+
+        <div class="links">
+
+            <a
+                class="link-button"
+                href="MissingNum.html"
+            >
+                🔢 Missing Number
+                <span class="description">
+                    Practice addition and subtraction
+                </span>
+            </a>
+
+            <a
+                class="link-button"
+                href="Muliplication.html"
+            >
+                ✖️ Multiplication Practice
+                <span class="description">
+                    Practice times tables from 2 to 12
+                </span>
+            </a>
+
+            <a
+                class="link-button"
+                href="Division.html"
+            >
+                ➗ Division Practice
+                <span class="description">
+                    Practice division using times tables
+                </span>
+            </a>
+
+            <a
+                class="link-button"
+                href="TimesTable.html"
+            >
+                📋 Times Table
+                <span class="description">
+                    View the times table chart
+                </span>
+            </a>
+
+        </div>
+
+        <div class="footer">
+            Maths Practice
+        </div>
+
+    </div>
+
+</body>
+</html>

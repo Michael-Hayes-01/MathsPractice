@@ -1,0 +1,993 @@
+
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Missing Number Practice</title>
+
+    <style>
+        * {
+            box-sizing: border-box;
+        }
+
+        body {
+            font-family: Arial, sans-serif;
+            background: #f4f6f8;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            min-height: 100vh;
+            margin: 0;
+            transition: background-color 0.15s ease;
+            overflow: hidden;
+        }
+
+        /* =========================
+           GREEN FLASH - CORRECT
+           ========================= */
+
+        body.flash-green {
+            animation: greenFlash 1.6s ease-in-out 1;
+        }
+
+        @keyframes greenFlash {
+            0%, 100% {
+                background-color: #f4f6f8;
+            }
+
+            7.5% {
+                background-color: #32cd32;
+            }
+
+            15% {
+                background-color: #f4f6f8;
+            }
+
+            22.5% {
+                background-color: #32cd32;
+            }
+
+            30% {
+                background-color: #f4f6f8;
+            }
+
+            37.5% {
+                background-color: #32cd32;
+            }
+
+            45% {
+                background-color: #f4f6f8;
+            }
+
+            52.5% {
+                background-color: #32cd32;
+            }
+
+            60% {
+                background-color: #f4f6f8;
+            }
+
+            67.5% {
+                background-color: #32cd32;
+            }
+
+            75% {
+                background-color: #f4f6f8;
+            }
+
+            82.5% {
+                background-color: #32cd32;
+            }
+
+            90% {
+                background-color: #f4f6f8;
+            }
+        }
+
+        /* =========================
+           RED FLASH - WRONG
+           ========================= */
+
+        body.flash-red {
+            animation: redFlash 0.8s ease-in-out 1;
+        }
+
+        @keyframes redFlash {
+            0%, 100% {
+                background-color: #f4f6f8;
+            }
+
+            15% {
+                background-color: #ff3b30;
+            }
+
+            30% {
+                background-color: #f4f6f8;
+            }
+
+            45% {
+                background-color: #ff3b30;
+            }
+
+            60% {
+                background-color: #f4f6f8;
+            }
+        }
+
+        /* =========================
+           MAIN CONTAINER
+           ========================= */
+
+        .container {
+            background: white;
+            padding: 40px;
+            border-radius: 12px;
+            box-shadow: 0 4px 15px rgba(0, 0, 0, 0.1);
+            text-align: center;
+            width: 90%;
+            max-width: 650px;
+            position: relative;
+            z-index: 2;
+        }
+
+        h1 {
+            margin-bottom: 25px;
+            color: #333;
+        }
+
+        /* =========================
+           MODE TOGGLE
+           ========================= */
+
+        .toggle-container {
+            display: flex;
+            justify-content: center;
+            margin-bottom: 25px;
+        }
+
+        .toggle {
+            display: flex;
+            border: 2px solid #333;
+            border-radius: 8px;
+            overflow: hidden;
+        }
+
+        .toggle button {
+            border: none;
+            border-radius: 0;
+            margin: 0;
+            padding: 10px 22px;
+            font-size: 18px;
+            cursor: pointer;
+            background: #eee;
+            color: #333;
+        }
+
+        .toggle button:hover {
+            background: #ddd;
+        }
+
+        .toggle button.active {
+            background: #333;
+            color: white;
+        }
+
+        /* =========================
+           EQUATION
+           ========================= */
+
+        .equation {
+            font-size: 36px;
+            font-weight: bold;
+            margin: 30px 0;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            gap: 12px;
+        }
+
+        .answer-input {
+            width: 100px;
+            height: 55px;
+            font-size: 30px;
+            text-align: center;
+            border: 2px solid #888;
+            border-radius: 6px;
+        }
+
+        .answer-input:focus {
+            outline: none;
+            border-color: #333;
+        }
+
+        /* Remove number input arrows */
+        .answer-input::-webkit-inner-spin-button,
+        .answer-input::-webkit-outer-spin-button {
+            -webkit-appearance: none;
+            margin: 0;
+        }
+
+        /* =========================
+           ACTION BUTTONS
+           ========================= */
+
+        .actions button {
+            padding: 12px 28px;
+            font-size: 18px;
+            border: none;
+            border-radius: 6px;
+            cursor: pointer;
+            margin: 8px;
+        }
+
+        #submitBtn {
+            background: #333;
+            color: white;
+        }
+
+        #submitBtn:hover {
+            background: #555;
+        }
+
+        #generateBtn {
+            background: #ddd;
+            color: #333;
+        }
+
+        #generateBtn:hover {
+            background: #ccc;
+        }
+
+        /* =========================
+           MESSAGE
+           ========================= */
+
+        #message {
+            margin-top: 20px;
+            font-size: 22px;
+            font-weight: bold;
+            min-height: 28px;
+        }
+
+        .correct {
+            color: green;
+        }
+
+        .incorrect {
+            color: red;
+        }
+
+        /* =========================
+           FIREWORKS
+           ========================= */
+
+        #fireworks {
+            position: fixed;
+            inset: 0;
+            pointer-events: none;
+            z-index: 10;
+        }
+
+        .firework {
+            position: absolute;
+            width: 8px;
+            height: 8px;
+            border-radius: 50%;
+        }
+
+        .spark {
+            position: absolute;
+            left: 0;
+            top: 0;
+            width: 6px;
+            height: 22px;
+            border-radius: 50%;
+            transform-origin: 50% 100%;
+            animation: sparkFly 850ms ease-out forwards;
+        }
+
+        @keyframes sparkFly {
+            0% {
+                transform:
+                    rotate(var(--angle))
+                    translateY(0)
+                    scaleY(0.2);
+                opacity: 1;
+            }
+
+            70% {
+                opacity: 1;
+            }
+
+            100% {
+                transform:
+                    rotate(var(--angle))
+                    translateY(var(--distance))
+                    scaleY(1);
+                opacity: 0;
+            }
+        }
+
+        /* =========================
+           MOBILE
+           ========================= */
+
+        @media (max-width: 600px) {
+
+            .container {
+                padding: 25px 15px;
+            }
+
+            h1 {
+                font-size: 28px;
+            }
+
+            .toggle button {
+                padding: 9px 12px;
+                font-size: 15px;
+            }
+
+            .equation {
+                font-size: 28px;
+                gap: 8px;
+            }
+
+            .answer-input {
+                width: 75px;
+                height: 48px;
+                font-size: 26px;
+            }
+        }
+    </style>
+</head>
+
+<body>
+
+    <!-- Fireworks are created here -->
+    <div id="fireworks"></div>
+
+    <div class="container">
+
+        <h1>Missing Number Practice</h1>
+
+        <!-- =========================
+             ADD / SUBTRACT / RANDOM
+             ========================= -->
+
+        <div class="toggle-container">
+
+            <div class="toggle">
+
+                <button id="addBtn" class="active">
+                    Add +
+                </button>
+
+                <button id="subtractBtn">
+                    Subtract −
+                </button>
+
+                <button id="randomBtn">
+                    Random
+                </button>
+
+            </div>
+
+        </div>
+
+        <!-- =========================
+             EQUATION
+             ========================= -->
+
+        <div class="equation" id="equation"></div>
+
+        <!-- =========================
+             ACTION BUTTONS
+             ========================= -->
+
+        <div class="actions">
+
+            <button id="submitBtn">
+                Submit
+            </button>
+
+            <button id="generateBtn">
+                Generate
+            </button>
+
+        </div>
+
+        <!-- Feedback -->
+        <div id="message"></div>
+
+    </div>
+
+
+    <script src="util.js"></script>
+
+    <script>
+
+        /*
+         * ==========================================
+         * GAME STATE
+         * ==========================================
+         */
+
+        let selectedMode = "add";
+
+        let currentOperation = "add";
+
+        let correctAnswer = 0;
+
+        let answerSubmitted = false;
+
+        let lastEffectAnswer = null;
+
+
+        /*
+         * ==========================================
+         * GENERATE PROBLEM
+         * ==========================================
+         */
+
+        function generateProblem() {
+
+            /*
+             * Determine operation.
+             *
+             * Add:
+             *     Always addition.
+             *
+             * Subtract:
+             *     Always subtraction.
+             *
+             * Random:
+             *     Approximately 50/50.
+             */
+
+            if (selectedMode === "random") {
+
+                currentOperation =
+                    Math.random() < 0.5
+                        ? "add"
+                        : "subtract";
+
+            } else {
+
+                currentOperation =
+                    selectedMode;
+            }
+
+
+            let num1;
+            let num2;
+            let num3;
+
+
+            /*
+             * ======================================
+             * ADDITION
+             * ======================================
+             */
+
+            if (currentOperation === "add") {
+
+                num1 =
+                    Math.floor(Math.random() * 50) + 1;
+
+                num2 =
+                    Math.floor(Math.random() * 50) + 1;
+
+                num3 =
+                    num1 + num2;
+            }
+
+
+            /*
+             * ======================================
+             * SUBTRACTION
+             *
+             * Num1 >= Num2
+             * ======================================
+             */
+
+            else {
+
+                num1 =
+                    Math.floor(Math.random() * 50) + 1;
+
+                num2 =
+                    Math.floor(
+                        Math.random() * num1
+                    ) + 1;
+
+                num3 =
+                    num1 - num2;
+            }
+
+
+            /*
+             * Randomly choose which number is missing.
+             *
+             * 0 = Num1
+             * 1 = Num2
+             * 2 = Num3
+             */
+
+            const missingNumber =
+                Math.floor(Math.random() * 3);
+
+
+            const equation =
+                document.getElementById(
+                    "equation"
+                );
+
+            const message =
+                document.getElementById(
+                    "message"
+                );
+
+
+            message.textContent = "";
+
+            message.className = "";
+
+
+            answerSubmitted = false;
+
+            lastEffectAnswer = null;
+
+
+            /*
+             * Choose the operator.
+             */
+
+            const operator =
+                currentOperation === "add"
+                    ? "+"
+                    : "−";
+
+
+            /*
+             * ======================================
+             * NUM1 MISSING
+             * ======================================
+             */
+
+            if (missingNumber === 0) {
+
+                correctAnswer = num1;
+
+
+                equation.innerHTML = `
+
+                    <input
+                        type="number"
+                        id="answer"
+                        class="answer-input"
+                        aria-label="Missing number"
+                        autocomplete="off"
+                    >
+
+                    <span>${operator}</span>
+
+                    <span>${num2}</span>
+
+                    <span>=</span>
+
+                    <span>${num3}</span>
+
+                `;
+            }
+
+
+            /*
+             * ======================================
+             * NUM2 MISSING
+             * ======================================
+             */
+
+            else if (missingNumber === 1) {
+
+                correctAnswer = num2;
+
+
+                equation.innerHTML = `
+
+                    <span>${num1}</span>
+
+                    <span>${operator}</span>
+
+                    <input
+                        type="number"
+                        id="answer"
+                        class="answer-input"
+                        aria-label="Missing number"
+                        autocomplete="off"
+                    >
+
+                    <span>=</span>
+
+                    <span>${num3}</span>
+
+                `;
+            }
+
+
+            /*
+             * ======================================
+             * NUM3 MISSING
+             * ======================================
+             */
+
+            else {
+
+                correctAnswer = num3;
+
+
+                equation.innerHTML = `
+
+                    <span>${num1}</span>
+
+                    <span>${operator}</span>
+
+                    <span>${num2}</span>
+
+                    <span>=</span>
+
+                    <input
+                        type="number"
+                        id="answer"
+                        class="answer-input"
+                        aria-label="Missing number"
+                        autocomplete="off"
+                    >
+
+                `;
+            }
+
+
+            /*
+             * Put the cursor in the answer box.
+             */
+
+            document
+                .getElementById("answer")
+                .focus();
+        }
+
+
+        /*
+         * ==========================================
+         * SET MODE
+         * ==========================================
+         */
+
+        function setMode(mode) {
+
+            selectedMode = mode;
+
+
+            /*
+             * Remove active state from all buttons.
+             */
+
+            document
+                .getElementById("addBtn")
+                .classList.remove("active");
+
+            document
+                .getElementById("subtractBtn")
+                .classList.remove("active");
+
+            document
+                .getElementById("randomBtn")
+                .classList.remove("active");
+
+
+            /*
+             * Activate selected button.
+             */
+
+            if (mode === "add") {
+
+                document
+                    .getElementById("addBtn")
+                    .classList.add("active");
+            }
+
+
+            if (mode === "subtract") {
+
+                document
+                    .getElementById("subtractBtn")
+                    .classList.add("active");
+            }
+
+
+            if (mode === "random") {
+
+                document
+                    .getElementById("randomBtn")
+                    .classList.add("active");
+            }
+
+
+            /*
+             * Immediately generate a problem
+             * using the newly selected mode.
+             */
+
+            generateProblem();
+        }
+
+
+        /*
+         * ==========================================
+         * SUBMIT ANSWER
+         * ==========================================
+         */
+
+        function submitAnswer() {
+
+            const input =
+                document.getElementById("answer");
+
+            const message =
+                document.getElementById("message");
+
+
+            /*
+             * No answer entered.
+             */
+
+            if (input.value.trim() === "") {
+
+                message.textContent =
+                    "Please enter an answer.";
+
+                message.className =
+                    "incorrect";
+
+                input.focus();
+
+                return;
+            }
+
+
+            const userAnswer =
+                Number(input.value);
+
+
+            /*
+             * ======================================
+             * CORRECT
+             * ======================================
+             */
+
+            if (userAnswer === correctAnswer) {
+
+                /*
+                 * Only play the happy sound and
+                 * effect once per distinct answer.
+                 * Resubmitting the same answer
+                 * (e.g. pressing Submit again)
+                 * stays silent.
+                 */
+
+                const isNewAnswer =
+                    userAnswer !== lastEffectAnswer;
+
+                lastEffectAnswer = userAnswer;
+
+
+                if (isNewAnswer) {
+
+                    playHappySound();
+
+                    /*
+                     * Green flash
+                     * + a random happy effect
+                     */
+
+                    celebrateCorrectAnswer();
+                }
+
+
+                message.textContent =
+                    "Correct! 🎉";
+
+                message.className =
+                    "correct";
+
+
+                /*
+                 * The next Enter will generate
+                 * a new problem.
+                 */
+
+                answerSubmitted = true;
+            }
+
+
+            /*
+             * ======================================
+             * WRONG
+             * ======================================
+             */
+
+            else {
+
+                /*
+                 * Only play the sad sound and
+                 * red flash once per distinct
+                 * wrong answer.
+                 */
+
+                const isNewAnswer =
+                    userAnswer !== lastEffectAnswer;
+
+                lastEffectAnswer = userAnswer;
+
+
+                if (isNewAnswer) {
+
+                    playSadSound();
+
+                    flashRed();
+                }
+
+
+                message.textContent =
+                    "Wrong! Try again.";
+
+                message.className =
+                    "incorrect";
+
+
+                /*
+                 * Keep this question active.
+                 *
+                 * Enter will submit again.
+                 */
+
+                answerSubmitted = false;
+
+                input.focus();
+            }
+        }
+
+
+        /*
+         * ==========================================
+         * MODE BUTTONS
+         * ==========================================
+         */
+
+        document
+            .getElementById("addBtn")
+            .addEventListener(
+                "click",
+                function () {
+
+                    setMode("add");
+
+                }
+            );
+
+
+        document
+            .getElementById("subtractBtn")
+            .addEventListener(
+                "click",
+                function () {
+
+                    setMode("subtract");
+
+                }
+            );
+
+
+        document
+            .getElementById("randomBtn")
+            .addEventListener(
+                "click",
+                function () {
+
+                    setMode("random");
+
+                }
+            );
+
+
+        /*
+         * ==========================================
+         * SUBMIT BUTTON
+         * ==========================================
+         */
+
+        document
+            .getElementById("submitBtn")
+            .addEventListener(
+                "click",
+                function () {
+
+                    submitAnswer();
+
+                }
+            );
+
+
+        /*
+         * ==========================================
+         * GENERATE BUTTON
+         * ==========================================
+         */
+
+        document
+            .getElementById("generateBtn")
+            .addEventListener(
+                "click",
+                function () {
+
+                    generateProblem();
+
+                }
+            );
+
+
+        /*
+         * ==========================================
+         * ENTER KEY
+         * ==========================================
+         *
+         * First Enter:
+         *     Submit
+         *
+         * Second Enter after correct:
+         *     Generate
+         *
+         * Wrong answer:
+         *     Enter remains Submit
+         */
+
+        document.addEventListener(
+            "keydown",
+            function (event) {
+
+                if (event.key !== "Enter") {
+                    return;
+                }
+
+
+                event.preventDefault();
+
+
+                if (answerSubmitted) {
+
+                    generateProblem();
+
+                } else {
+
+                    submitAnswer();
+
+                }
+
+            }
+        );
+
+
+        /*
+         * ==========================================
+         * START GAME
+         * ==========================================
+         */
+
+        generateProblem();
+
+    </script>
+
+</body>
+</html>
+```

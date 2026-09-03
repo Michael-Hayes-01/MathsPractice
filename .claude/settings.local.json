@@ -1,0 +1,9 @@
+{
+  "permissions": {
+    "allow": [
+      "WebSearch",
+      "WebFetch(domain:mixkit.co)",
+      "PowerShell(node --check D:\\\\code\\\\mia\\\\util.js 2>&1; if \\($?\\) { \"syntax OK\" })"
+    ]
+  }
+}
