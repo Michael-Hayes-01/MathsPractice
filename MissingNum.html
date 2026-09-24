@@ -239,6 +239,11 @@
             background: #ccc;
         }
 
+        #generateBtn:disabled {
+            opacity: 0.5;
+            cursor: not-allowed;
+        }
+
         /* =========================
            MESSAGE
            ========================= */
@@ -391,7 +396,7 @@
                 Submit
             </button>
 
-            <button id="generateBtn">
+            <button id="generateBtn" disabled>
                 Generate
             </button>
 
@@ -413,15 +418,73 @@
          * ==========================================
          */
 
-        let selectedMode = "add";
-
-        let currentOperation = "add";
-
         let correctAnswer = 0;
 
         let answerSubmitted = false;
 
         let lastEffectAnswer = null;
+
+
+        /*
+         * ==========================================
+         * PERSISTED STATE
+         * ==========================================
+         *
+         * Remembers the unsolved question for each
+         * mode (and which mode was active), so
+         * switching modes and back - or refreshing
+         * the page - restores it instead of losing
+         * progress.
+         */
+
+        const STORAGE_KEY = "missingNumberPracticeState";
+
+
+        function loadState() {
+
+            try {
+
+                const raw =
+                    localStorage.getItem(STORAGE_KEY);
+
+                return raw ? JSON.parse(raw) : {};
+
+            } catch (e) {
+
+                return {};
+            }
+        }
+
+
+        function saveState() {
+
+            try {
+
+                localStorage.setItem(
+                    STORAGE_KEY,
+                    JSON.stringify({
+                        selectedMode: selectedMode,
+                        pendingByMode: pendingByMode
+                    })
+                );
+
+            } catch (e) {}
+        }
+
+
+        const persistedState = loadState();
+
+        let pendingByMode =
+            persistedState.pendingByMode || {
+                add: null,
+                subtract: null,
+                random: null
+            };
+
+        let selectedMode =
+            persistedState.selectedMode || "add";
+
+        let currentOperation = selectedMode;
 
 
         /*
@@ -538,6 +601,8 @@
 
             lastEffectAnswer = null;
 
+            document.getElementById("generateBtn").disabled = true;
+
 
             /*
              * Choose the operator.
@@ -649,8 +714,76 @@
 
 
             /*
+             * Remember this as the unsolved
+             * question for the current mode.
+             */
+
+            pendingByMode[selectedMode] = {
+                equationHTML: equation.innerHTML,
+                correctAnswer: correctAnswer
+            };
+
+            saveState();
+
+
+            /*
              * Put the cursor in the answer box.
              */
+
+            document
+                .getElementById("answer")
+                .focus();
+        }
+
+
+        /*
+         * ==========================================
+         * LOAD QUESTION FOR MODE
+         *
+         * Restores the unsolved question left
+         * behind for this mode, or generates a
+         * new one if there isn't one.
+         * ==========================================
+         */
+
+        function loadQuestionForMode() {
+
+            const saved =
+                pendingByMode[selectedMode];
+
+            if (!saved) {
+
+                generateProblem();
+
+                return;
+            }
+
+
+            correctAnswer =
+                saved.correctAnswer;
+
+
+            const equation =
+                document.getElementById("equation");
+
+            const message =
+                document.getElementById("message");
+
+
+            equation.innerHTML =
+                saved.equationHTML;
+
+            message.textContent = "";
+
+            message.className = "";
+
+
+            answerSubmitted = false;
+
+            lastEffectAnswer = null;
+
+            document.getElementById("generateBtn").disabled = true;
+
 
             document
                 .getElementById("answer")
@@ -667,6 +800,8 @@
         function setMode(mode) {
 
             selectedMode = mode;
+
+            saveState();
 
 
             /*
@@ -715,11 +850,11 @@
 
 
             /*
-             * Immediately generate a problem
-             * using the newly selected mode.
+             * Restore this mode's unsolved
+             * question, or generate a new one.
              */
 
-            generateProblem();
+            loadQuestionForMode();
         }
 
 
@@ -808,6 +943,18 @@
                  */
 
                 answerSubmitted = true;
+
+                document.getElementById("generateBtn").disabled = false;
+
+
+                /*
+                 * Solved - nothing left to
+                 * remember for this mode.
+                 */
+
+                pendingByMode[selectedMode] = null;
+
+                saveState();
             }
 
 
@@ -982,9 +1129,40 @@
          * ==========================================
          * START GAME
          * ==========================================
+         *
+         * Starts on Add, unless a previous
+         * mode/question was saved.
          */
 
-        generateProblem();
+        (function startGame() {
+
+            document
+                .getElementById("addBtn")
+                .classList.remove("active");
+
+            document
+                .getElementById("subtractBtn")
+                .classList.remove("active");
+
+            document
+                .getElementById("randomBtn")
+                .classList.remove("active");
+
+
+            const buttonIds = {
+                add: "addBtn",
+                subtract: "subtractBtn",
+                random: "randomBtn"
+            };
+
+            document
+                .getElementById(buttonIds[selectedMode])
+                .classList.add("active");
+
+
+            loadQuestionForMode();
+
+        })();
 
     </script>
 

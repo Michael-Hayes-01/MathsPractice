@@ -241,6 +241,11 @@
             background: #ccc;
         }
 
+        #generateBtn:disabled {
+            opacity: 0.5;
+            cursor: not-allowed;
+        }
+
         /* =========================
            MESSAGE
            ========================= */
@@ -381,7 +386,7 @@
                 Submit
             </button>
 
-            <button id="generateBtn">
+            <button id="generateBtn" disabled>
                 Generate
             </button>
 
@@ -409,6 +414,70 @@
         let answerSubmitted = false;
 
         let lastEffectAnswer = null;
+
+
+        /*
+         * ==========================================
+         * PERSISTED STATE
+         * ==========================================
+         *
+         * Keeps the in-progress question for each
+         * times table, so refreshing the page or
+         * switching tables and back does not let
+         * the user skip an unanswered question.
+         */
+
+        const STORAGE_KEY = "multiplicationPracticeState";
+
+
+        function loadState() {
+
+            try {
+
+                const raw =
+                    localStorage.getItem(STORAGE_KEY);
+
+                return raw ? JSON.parse(raw) : {};
+
+            } catch (e) {
+
+                return {};
+            }
+        }
+
+
+        function saveState(state) {
+
+            try {
+
+                localStorage.setItem(
+                    STORAGE_KEY,
+                    JSON.stringify(state)
+                );
+
+            } catch (e) {}
+        }
+
+
+        function saveCurrentProblem(table) {
+
+            const state = loadState();
+
+            if (!state.problems) {
+
+                state.problems = {};
+            }
+
+            state.problems[table] = {
+                correctAnswer: correctAnswer,
+                equationHTML:
+                    document.getElementById("equation").innerHTML
+            };
+
+            state.selectedTable = table;
+
+            saveState(state);
+        }
 
 
         /*
@@ -454,6 +523,8 @@
             answerSubmitted = false;
 
             lastEffectAnswer = null;
+
+            document.getElementById("generateBtn").disabled = true;
 
 
             const equation =
@@ -591,6 +662,71 @@
             document
                 .getElementById("answer")
                 .focus();
+
+
+            /*
+             * Persist this question so it survives
+             * a refresh or switching tables and back.
+             */
+
+            saveCurrentProblem(table);
+        }
+
+
+        /*
+         * ==========================================
+         * RESTORE OR GENERATE QUESTION
+         * ==========================================
+         *
+         * If there is already an unanswered question
+         * saved for this table, show that one again
+         * instead of generating a new one. This stops
+         * the user from "skipping" a question by
+         * switching tables and back, or by refreshing.
+         * ==========================================
+         */
+
+        function restoreOrGenerateProblem(table) {
+
+            const state = loadState();
+
+            const stored =
+                state.problems && state.problems[table];
+
+
+            if (!stored) {
+
+                generateProblem();
+
+                return;
+            }
+
+
+            correctAnswer = stored.correctAnswer;
+
+            answerSubmitted = false;
+
+            lastEffectAnswer = null;
+
+            document.getElementById("generateBtn").disabled = true;
+
+
+            const equation =
+                document.getElementById("equation");
+
+            const message =
+                document.getElementById("message");
+
+
+            message.textContent = "";
+            message.className = "";
+
+            equation.innerHTML = stored.equationHTML;
+
+
+            document
+                .getElementById("answer")
+                .focus();
         }
 
 
@@ -630,10 +766,11 @@
 
 
             /*
-             * Immediately generate a new question.
+             * Restore this table's unanswered question,
+             * or generate a new one if it doesn't have one.
              */
 
-            generateProblem();
+            restoreOrGenerateProblem(table);
         }
 
 
@@ -722,6 +859,8 @@
                  */
 
                 answerSubmitted = true;
+
+                document.getElementById("generateBtn").disabled = false;
             }
 
 
@@ -879,10 +1018,42 @@
          * START GAME
          * ==========================================
          *
-         * Starts on the 3 times table.
+         * Starts on the 3 times table, unless a
+         * previous table/question was saved.
          */
 
-        generateProblem();
+        (function startGame() {
+
+            const state = loadState();
+
+            const savedTable = state.selectedTable;
+
+            const savedButton =
+                savedTable &&
+                document.querySelector(
+                    `.table-selector button[data-table="${savedTable}"]`
+                );
+
+
+            if (savedButton) {
+
+                selectedTable = savedTable;
+
+                document
+                    .querySelectorAll(".table-selector button")
+                    .forEach(function(button) {
+
+                        button.classList.remove("active");
+
+                    });
+
+                savedButton.classList.add("active");
+            }
+
+
+            restoreOrGenerateProblem(selectedTable);
+
+        })();
 
     </script>
 

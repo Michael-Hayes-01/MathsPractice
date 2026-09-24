@@ -1147,7 +1147,7 @@ function launchCats() {
     const catCount = 5;
 
     const y =
-        window.innerHeight - 70;
+        window.innerHeight - 110;
 
     const endX =
         window.innerWidth + 60;
@@ -1171,13 +1171,13 @@ function launchCats() {
         cat.style.top = y + "px";
         cat.style.left = "-60px";
         cat.style.fontSize =
-            (34 + Math.random() * 10) + "px";
+            (70 + Math.random() * 20) + "px";
 
         container.appendChild(cat);
 
 
         const duration =
-            2400 + Math.random() * 800;
+            (2400 + Math.random() * 800) * 3;
 
         const delay =
             i * 220;
@@ -1234,7 +1234,7 @@ function launchDogs() {
     const dogCount = 5;
 
     const y =
-        window.innerHeight - 70;
+        window.innerHeight - 110;
 
     const travel =
         window.innerWidth + 120;
@@ -1258,13 +1258,13 @@ function launchDogs() {
         dog.style.top = y + "px";
         dog.style.right = "-60px";
         dog.style.fontSize =
-            (34 + Math.random() * 10) + "px";
+            (70 + Math.random() * 20) + "px";
 
         container.appendChild(dog);
 
 
         const duration =
-            1800 + Math.random() * 700;
+            (1800 + Math.random() * 700) * 3;
 
         const delay =
             i * 180;
@@ -1296,6 +1296,85 @@ function launchDogs() {
         anim.onfinish = function () {
 
             dog.remove();
+        };
+    }
+}
+
+
+/*
+ * ==========================================
+ * FLAMINGO PARADE
+ * ==========================================
+ */
+
+function launchFlamingos() {
+
+    const container =
+        document.getElementById("fireworks");
+
+    const flamingoCount = 5;
+
+    const y =
+        window.innerHeight - 110;
+
+    const endX =
+        window.innerWidth + 60;
+
+
+    for (
+        let i = 0;
+        i < flamingoCount;
+        i++
+    ) {
+
+        const flamingo =
+            document.createElement("div");
+
+        flamingo.textContent = "🦩";
+
+        flamingo.style.position = "absolute";
+        flamingo.style.top = y + "px";
+        flamingo.style.left = "-60px";
+        flamingo.style.fontSize =
+            (70 + Math.random() * 20) + "px";
+
+        container.appendChild(flamingo);
+
+
+        const duration =
+            (2400 + Math.random() * 800) * 3;
+
+        const delay =
+            i * 220;
+
+
+        const anim = flamingo.animate(
+            [
+                {
+                    left: "-60px",
+                    transform: "translateY(0)"
+                },
+                {
+                    left: (endX * 0.5) + "px",
+                    transform: "translateY(-14px)",
+                    offset: 0.5
+                },
+                {
+                    left: endX + "px",
+                    transform: "translateY(0)"
+                }
+            ],
+            {
+                duration: duration,
+                delay: delay,
+                easing: "ease-in-out",
+                fill: "forwards"
+            }
+        );
+
+        anim.onfinish = function () {
+
+            flamingo.remove();
         };
     }
 }
@@ -1467,6 +1546,7 @@ const HAPPY_EFFECTS = [
     launchUnicorn,
     launchCats,
     launchDogs,
+    launchFlamingos,
     launchBouncingText
 ];
 
