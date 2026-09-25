@@ -1,0 +1,1200 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Multiply &amp; Divide Practice</title>
+
+    <style>
+        * {
+            box-sizing: border-box;
+        }
+
+        body {
+            font-family: Arial, sans-serif;
+            background: #f4f6f8;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            min-height: 100vh;
+            margin: 0;
+            transition: background-color 0.15s ease;
+            overflow: hidden;
+        }
+
+        /* =========================
+           GREEN FLASH - CORRECT
+           ========================= */
+
+        body.flash-green {
+            animation: greenFlash 1.6s ease-in-out 1;
+        }
+
+        @keyframes greenFlash {
+            0%, 100% {
+                background-color: #f4f6f8;
+            }
+
+            7.5% {
+                background-color: #32cd32;
+            }
+
+            15% {
+                background-color: #f4f6f8;
+            }
+
+            22.5% {
+                background-color: #32cd32;
+            }
+
+            30% {
+                background-color: #f4f6f8;
+            }
+
+            37.5% {
+                background-color: #32cd32;
+            }
+
+            45% {
+                background-color: #f4f6f8;
+            }
+
+            52.5% {
+                background-color: #32cd32;
+            }
+
+            60% {
+                background-color: #f4f6f8;
+            }
+
+            67.5% {
+                background-color: #32cd32;
+            }
+
+            75% {
+                background-color: #f4f6f8;
+            }
+
+            82.5% {
+                background-color: #32cd32;
+            }
+
+            90% {
+                background-color: #f4f6f8;
+            }
+        }
+
+        /* =========================
+           RED FLASH - WRONG
+           ========================= */
+
+        body.flash-red {
+            animation: redFlash 0.8s ease-in-out 1;
+        }
+
+        @keyframes redFlash {
+            0%, 100% {
+                background-color: #f4f6f8;
+            }
+
+            15% {
+                background-color: #ff3b30;
+            }
+
+            30% {
+                background-color: #f4f6f8;
+            }
+
+            45% {
+                background-color: #ff3b30;
+            }
+
+            60% {
+                background-color: #f4f6f8;
+            }
+        }
+
+        /* =========================
+           MAIN CONTAINER
+           ========================= */
+
+        .container {
+            background: white;
+            padding: 40px;
+            border-radius: 12px;
+            box-shadow: 0 4px 15px rgba(0, 0, 0, 0.1);
+            text-align: center;
+            width: 90%;
+            max-width: 700px;
+            position: relative;
+            z-index: 2;
+        }
+
+        h1 {
+            margin-bottom: 25px;
+            color: #333;
+        }
+
+        /* =========================
+           MODE TOGGLE
+           ========================= */
+
+        .toggle-container {
+            display: flex;
+            justify-content: center;
+            margin-bottom: 25px;
+        }
+
+        .toggle {
+            display: flex;
+            border: 2px solid #333;
+            border-radius: 8px;
+            overflow: hidden;
+        }
+
+        .toggle button {
+            border: none;
+            border-radius: 0;
+            margin: 0;
+            padding: 10px 22px;
+            font-size: 18px;
+            cursor: pointer;
+            background: #eee;
+            color: #333;
+        }
+
+        .toggle button:hover {
+            background: #ddd;
+        }
+
+        .toggle button.active {
+            background: #333;
+            color: white;
+        }
+
+        /* =========================
+           TIMES TABLE SELECTOR
+           ========================= */
+
+        .table-label {
+            font-size: 18px;
+            font-weight: bold;
+            color: #555;
+            margin-bottom: 10px;
+        }
+
+        .table-selector {
+            display: flex;
+            justify-content: center;
+            flex-wrap: wrap;
+            gap: 5px;
+            margin-bottom: 30px;
+        }
+
+        .table-selector button {
+            width: 48px;
+            height: 42px;
+            border: 2px solid #333;
+            border-radius: 6px;
+            font-size: 17px;
+            font-weight: bold;
+            cursor: pointer;
+            background: #eee;
+            color: #333;
+        }
+
+        .table-selector button[data-table="any"] {
+            width: auto;
+            padding: 0 12px;
+        }
+
+        .table-selector button:hover {
+            background: #ddd;
+        }
+
+        .table-selector button.active {
+            background: #333;
+            color: white;
+        }
+
+        /* =========================
+           EQUATION
+           ========================= */
+
+        .equation {
+            font-size: 42px;
+            font-weight: bold;
+            margin: 35px 0;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            gap: 14px;
+        }
+
+        .answer-input {
+            width: 110px;
+            height: 60px;
+            font-size: 34px;
+            font-weight: bold;
+            text-align: center;
+            border: 2px solid #888;
+            border-radius: 6px;
+        }
+
+        .answer-input:focus {
+            outline: none;
+            border-color: #333;
+        }
+
+        .answer-input::-webkit-inner-spin-button,
+        .answer-input::-webkit-outer-spin-button {
+            -webkit-appearance: none;
+            margin: 0;
+        }
+
+        /* =========================
+           ACTION BUTTONS
+           ========================= */
+
+        .actions button {
+            padding: 13px 30px;
+            font-size: 18px;
+            border: none;
+            border-radius: 6px;
+            cursor: pointer;
+            margin: 8px;
+        }
+
+        #submitBtn {
+            background: #333;
+            color: white;
+        }
+
+        #submitBtn:hover {
+            background: #555;
+        }
+
+        #generateBtn {
+            background: #ddd;
+            color: #333;
+        }
+
+        #generateBtn:hover {
+            background: #ccc;
+        }
+
+        #generateBtn:disabled {
+            opacity: 0.5;
+            cursor: not-allowed;
+        }
+
+        /* =========================
+           MESSAGE
+           ========================= */
+
+        #message {
+            margin-top: 20px;
+            font-size: 22px;
+            font-weight: bold;
+            min-height: 28px;
+        }
+
+        .correct {
+            color: green;
+        }
+
+        .incorrect {
+            color: red;
+        }
+
+        /* =========================
+           FIREWORKS
+           ========================= */
+
+        #fireworks {
+            position: fixed;
+            inset: 0;
+            pointer-events: none;
+            z-index: 10;
+        }
+
+        .firework {
+            position: absolute;
+            width: 8px;
+            height: 8px;
+            border-radius: 50%;
+        }
+
+        .spark {
+            position: absolute;
+            left: 0;
+            top: 0;
+            width: 6px;
+            height: 22px;
+            border-radius: 50%;
+            transform-origin: 50% 100%;
+            animation: sparkFly 850ms ease-out forwards;
+        }
+
+        @keyframes sparkFly {
+            0% {
+                transform:
+                    rotate(var(--angle))
+                    translateY(0)
+                    scaleY(0.2);
+                opacity: 1;
+            }
+
+            70% {
+                opacity: 1;
+            }
+
+            100% {
+                transform:
+                    rotate(var(--angle))
+                    translateY(var(--distance))
+                    scaleY(1);
+                opacity: 0;
+            }
+        }
+
+        /* =========================
+           MOBILE
+           ========================= */
+
+        @media (max-width: 600px) {
+
+            .container {
+                padding: 25px 15px;
+            }
+
+            h1 {
+                font-size: 28px;
+            }
+
+            .toggle button {
+                padding: 9px 12px;
+                font-size: 15px;
+            }
+
+            .table-selector button {
+                width: 42px;
+                height: 38px;
+                font-size: 15px;
+            }
+
+            .equation {
+                font-size: 30px;
+                gap: 8px;
+            }
+
+            .answer-input {
+                width: 80px;
+                height: 50px;
+                font-size: 28px;
+            }
+        }
+    </style>
+</head>
+
+<body>
+
+    <div id="fireworks"></div>
+
+    <div class="container">
+
+        <h1>Multiply &amp; Divide Practice</h1>
+
+        <!-- =========================
+             MULTIPLY / DIVIDE / RANDOM
+             ========================= -->
+
+        <div class="toggle-container">
+
+            <div class="toggle">
+
+                <button id="multiplyBtn" class="active">
+                    Multiply ×
+                </button>
+
+                <button id="divideBtn">
+                    Divide ÷
+                </button>
+
+                <button id="randomBtn">
+                    Random
+                </button>
+
+            </div>
+
+        </div>
+
+        <!-- =========================
+             TIMES TABLE
+             ========================= -->
+
+        <div class="table-label">
+            Choose a times table
+        </div>
+
+        <div class="table-selector">
+
+            <button data-table="2">2</button>
+            <button data-table="3" class="active">3</button>
+            <button data-table="4">4</button>
+            <button data-table="5">5</button>
+            <button data-table="6">6</button>
+            <button data-table="7">7</button>
+            <button data-table="8">8</button>
+            <button data-table="9">9</button>
+            <button data-table="10">10</button>
+            <button data-table="11">11</button>
+            <button data-table="12">12</button>
+            <button data-table="any">Any</button>
+
+        </div>
+
+        <div class="equation" id="equation"></div>
+
+        <div class="actions">
+
+            <button id="submitBtn">
+                Submit
+            </button>
+
+            <button id="generateBtn" disabled>
+                Generate
+            </button>
+
+        </div>
+
+        <div id="message"></div>
+
+    </div>
+
+
+    <script src="util.js"></script>
+
+    <script>
+
+        /*
+         * ==========================================
+         * GAME STATE
+         * ==========================================
+         */
+
+        let correctAnswer = 0;
+
+        let answerSubmitted = false;
+
+        let lastEffectAnswer = null;
+
+
+        /*
+         * ==========================================
+         * PERSISTED STATE
+         * ==========================================
+         *
+         * Remembers the unsolved question for each
+         * mode + times table combination (and which
+         * mode/table was active), so switching and
+         * back - or refreshing the page - restores
+         * it instead of letting the user skip it.
+         */
+
+        const STORAGE_KEY = "multDivPracticeState";
+
+
+        function loadState() {
+
+            try {
+
+                const raw =
+                    localStorage.getItem(STORAGE_KEY);
+
+                return raw ? JSON.parse(raw) : {};
+
+            } catch (e) {
+
+                return {};
+            }
+        }
+
+
+        function saveState() {
+
+            try {
+
+                localStorage.setItem(
+                    STORAGE_KEY,
+                    JSON.stringify({
+                        selectedMode: selectedMode,
+                        selectedTable: selectedTable,
+                        pending: pending
+                    })
+                );
+
+            } catch (e) {}
+        }
+
+
+        const persistedState = loadState();
+
+        /*
+         * Unsolved questions, keyed by
+         * "mode:table", e.g. "divide:6"
+         * or "random:any".
+         */
+
+        let pending =
+            persistedState.pending || {};
+
+        let selectedMode =
+            persistedState.selectedMode || "multiply";
+
+        /*
+         * A number 2-12, or "any" for a random
+         * table on every new question.
+         */
+
+        let selectedTable =
+            persistedState.selectedTable || 3;
+
+
+        function pendingKey() {
+
+            return selectedMode + ":" + selectedTable;
+        }
+
+
+        function answerInputHTML() {
+
+            return `
+                <input
+                    type="number"
+                    id="answer"
+                    class="answer-input"
+                    aria-label="Missing number"
+                    autocomplete="off"
+                >
+            `;
+        }
+
+
+        /*
+         * ==========================================
+         * GENERATE PROBLEM
+         * ==========================================
+         */
+
+        function generateProblem() {
+
+            /*
+             * Determine operation.
+             *
+             * Multiply:
+             *     Always multiplication.
+             *
+             * Divide:
+             *     Always division.
+             *
+             * Random:
+             *     Approximately 50/50.
+             */
+
+            let operation;
+
+            if (selectedMode === "random") {
+
+                operation =
+                    Math.random() < 0.5
+                        ? "multiply"
+                        : "divide";
+
+            } else {
+
+                operation =
+                    selectedMode;
+            }
+
+
+            /*
+             * Determine times table.
+             *
+             * "any" picks a table from 2-12
+             * for each new question.
+             */
+
+            const table =
+                selectedTable === "any"
+                    ? Math.floor(Math.random() * 11) + 2
+                    : selectedTable;
+
+
+            /*
+             * Pick the other factor from 1 to 12.
+             */
+
+            const otherNumber =
+                Math.floor(Math.random() * 12) + 1;
+
+            const product =
+                table * otherNumber;
+
+
+            correctAnswer = 0;
+
+            answerSubmitted = false;
+
+            lastEffectAnswer = null;
+
+            document.getElementById("generateBtn").disabled = true;
+
+
+            const equation =
+                document.getElementById("equation");
+
+            const message =
+                document.getElementById("message");
+
+
+            message.textContent = "";
+            message.className = "";
+
+
+            /*
+             * Pick one of three question formats.
+             */
+
+            const questionType =
+                Math.floor(Math.random() * 3);
+
+            const input =
+                answerInputHTML();
+
+
+            /*
+             * ======================================
+             * MULTIPLICATION
+             *
+             * 0 = table × ? = product
+             * 1 = ? × table = product
+             * 2 = table × other = ?
+             * ======================================
+             */
+
+            if (operation === "multiply") {
+
+                if (questionType === 0) {
+
+                    correctAnswer = otherNumber;
+
+                    equation.innerHTML = `
+                        <span>${table}</span>
+                        <span>×</span>
+                        ${input}
+                        <span>=</span>
+                        <span>${product}</span>
+                    `;
+                }
+
+                else if (questionType === 1) {
+
+                    correctAnswer = otherNumber;
+
+                    equation.innerHTML = `
+                        ${input}
+                        <span>×</span>
+                        <span>${table}</span>
+                        <span>=</span>
+                        <span>${product}</span>
+                    `;
+                }
+
+                else {
+
+                    correctAnswer = product;
+
+                    equation.innerHTML = `
+                        <span>${table}</span>
+                        <span>×</span>
+                        <span>${otherNumber}</span>
+                        <span>=</span>
+                        ${input}
+                    `;
+                }
+            }
+
+
+            /*
+             * ======================================
+             * DIVISION
+             *
+             * 0 = product ÷ table = ?
+             * 1 = ? ÷ table = other
+             * 2 = product ÷ ? = other
+             *
+             * All answers are whole numbers.
+             * ======================================
+             */
+
+            else {
+
+                if (questionType === 0) {
+
+                    correctAnswer = otherNumber;
+
+                    equation.innerHTML = `
+                        <span>${product}</span>
+                        <span>÷</span>
+                        <span>${table}</span>
+                        <span>=</span>
+                        ${input}
+                    `;
+                }
+
+                else if (questionType === 1) {
+
+                    correctAnswer = product;
+
+                    equation.innerHTML = `
+                        ${input}
+                        <span>÷</span>
+                        <span>${table}</span>
+                        <span>=</span>
+                        <span>${otherNumber}</span>
+                    `;
+                }
+
+                else {
+
+                    correctAnswer = table;
+
+                    equation.innerHTML = `
+                        <span>${product}</span>
+                        <span>÷</span>
+                        ${input}
+                        <span>=</span>
+                        <span>${otherNumber}</span>
+                    `;
+                }
+            }
+
+
+            /*
+             * Remember this as the unsolved
+             * question for the current mode + table.
+             */
+
+            pending[pendingKey()] = {
+                equationHTML: equation.innerHTML,
+                correctAnswer: correctAnswer
+            };
+
+            saveState();
+
+
+            document
+                .getElementById("answer")
+                .focus();
+        }
+
+
+        /*
+         * ==========================================
+         * LOAD QUESTION
+         *
+         * Restores the unsolved question left
+         * behind for this mode + table, or
+         * generates a new one if there isn't one.
+         * ==========================================
+         */
+
+        function loadQuestion() {
+
+            const saved =
+                pending[pendingKey()];
+
+            if (!saved) {
+
+                generateProblem();
+
+                return;
+            }
+
+
+            correctAnswer =
+                saved.correctAnswer;
+
+
+            const equation =
+                document.getElementById("equation");
+
+            const message =
+                document.getElementById("message");
+
+
+            equation.innerHTML =
+                saved.equationHTML;
+
+            message.textContent = "";
+            message.className = "";
+
+
+            answerSubmitted = false;
+
+            lastEffectAnswer = null;
+
+            document.getElementById("generateBtn").disabled = true;
+
+
+            document
+                .getElementById("answer")
+                .focus();
+        }
+
+
+        /*
+         * ==========================================
+         * UPDATE BUTTON HIGHLIGHTS
+         * ==========================================
+         */
+
+        const MODE_BUTTON_IDS = {
+            multiply: "multiplyBtn",
+            divide: "divideBtn",
+            random: "randomBtn"
+        };
+
+
+        function updateActiveButtons() {
+
+            Object.keys(MODE_BUTTON_IDS).forEach(function(mode) {
+
+                document
+                    .getElementById(MODE_BUTTON_IDS[mode])
+                    .classList.toggle(
+                        "active",
+                        mode === selectedMode
+                    );
+
+            });
+
+
+            document
+                .querySelectorAll(".table-selector button")
+                .forEach(function(button) {
+
+                    button.classList.toggle(
+                        "active",
+                        button.dataset.table === String(selectedTable)
+                    );
+
+                });
+        }
+
+
+        /*
+         * ==========================================
+         * SET MODE / TABLE
+         * ==========================================
+         */
+
+        function setMode(mode) {
+
+            selectedMode = mode;
+
+            saveState();
+
+            updateActiveButtons();
+
+            loadQuestion();
+        }
+
+
+        function setTable(table) {
+
+            selectedTable = table;
+
+            saveState();
+
+            updateActiveButtons();
+
+            loadQuestion();
+        }
+
+
+        /*
+         * ==========================================
+         * SUBMIT ANSWER
+         * ==========================================
+         */
+
+        function submitAnswer() {
+
+            const input =
+                document.getElementById("answer");
+
+            const message =
+                document.getElementById("message");
+
+
+            /*
+             * Empty answer.
+             */
+
+            if (input.value.trim() === "") {
+
+                message.textContent =
+                    "Please enter an answer.";
+
+                message.className =
+                    "incorrect";
+
+                input.focus();
+
+                return;
+            }
+
+
+            const userAnswer =
+                Number(input.value);
+
+
+            /*
+             * ======================================
+             * CORRECT
+             * ======================================
+             */
+
+            if (userAnswer === correctAnswer) {
+
+                /*
+                 * Only play the happy sound and
+                 * effect once per distinct answer.
+                 */
+
+                const isNewAnswer =
+                    userAnswer !== lastEffectAnswer;
+
+                lastEffectAnswer = userAnswer;
+
+
+                if (isNewAnswer) {
+
+                    playHappySound();
+
+                    celebrateCorrectAnswer();
+                }
+
+
+                message.textContent =
+                    "Correct! 🎉";
+
+                message.className =
+                    "correct";
+
+
+                /*
+                 * Next Enter generates
+                 * a new question.
+                 */
+
+                answerSubmitted = true;
+
+                document.getElementById("generateBtn").disabled = false;
+
+
+                /*
+                 * Solved - nothing left to
+                 * remember for this mode + table.
+                 */
+
+                delete pending[pendingKey()];
+
+                saveState();
+            }
+
+
+            /*
+             * ======================================
+             * WRONG
+             * ======================================
+             */
+
+            else {
+
+                /*
+                 * Only play the sad sound and
+                 * red flash once per distinct
+                 * wrong answer.
+                 */
+
+                const isNewAnswer =
+                    userAnswer !== lastEffectAnswer;
+
+                lastEffectAnswer = userAnswer;
+
+
+                if (isNewAnswer) {
+
+                    playSadSound();
+
+                    flashRed();
+                }
+
+
+                message.textContent =
+                    "Wrong! Try again.";
+
+                message.className =
+                    "incorrect";
+
+
+                answerSubmitted = false;
+
+                input.focus();
+            }
+        }
+
+
+        /*
+         * ==========================================
+         * MODE BUTTONS
+         * ==========================================
+         */
+
+        Object.keys(MODE_BUTTON_IDS).forEach(function(mode) {
+
+            document
+                .getElementById(MODE_BUTTON_IDS[mode])
+                .addEventListener(
+                    "click",
+                    function() {
+
+                        setMode(mode);
+
+                    }
+                );
+
+        });
+
+
+        /*
+         * ==========================================
+         * TIMES TABLE BUTTONS
+         * ==========================================
+         */
+
+        document
+            .querySelectorAll(".table-selector button")
+            .forEach(function(button) {
+
+                button.addEventListener(
+                    "click",
+                    function() {
+
+                        const table =
+                            button.dataset.table === "any"
+                                ? "any"
+                                : Number(button.dataset.table);
+
+                        setTable(table);
+                    }
+                );
+
+            });
+
+
+        /*
+         * ==========================================
+         * SUBMIT / GENERATE BUTTONS
+         * ==========================================
+         */
+
+        document
+            .getElementById("submitBtn")
+            .addEventListener(
+                "click",
+                function() {
+
+                    submitAnswer();
+
+                }
+            );
+
+
+        document
+            .getElementById("generateBtn")
+            .addEventListener(
+                "click",
+                function() {
+
+                    generateProblem();
+
+                }
+            );
+
+
+        /*
+         * ==========================================
+         * ENTER KEY
+         * ==========================================
+         *
+         * First Enter:
+         *     Submit
+         *
+         * Second Enter after correct:
+         *     Generate
+         *
+         * Wrong answer:
+         *     Enter remains Submit
+         */
+
+        document.addEventListener(
+            "keydown",
+            function(event) {
+
+                if (event.key !== "Enter") {
+                    return;
+                }
+
+
+                event.preventDefault();
+
+
+                if (answerSubmitted) {
+
+                    generateProblem();
+
+                } else {
+
+                    submitAnswer();
+
+                }
+
+            }
+        );
+
+
+        /*
+         * ==========================================
+         * START GAME
+         * ==========================================
+         *
+         * Starts on Multiply, 3 times table,
+         * unless a previous mode/table was saved.
+         */
+
+        (function startGame() {
+
+            updateActiveButtons();
+
+            loadQuestion();
+
+        })();
+
+    </script>
+
+</body>
+</html>

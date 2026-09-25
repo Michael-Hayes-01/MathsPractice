@@ -2,8 +2,8 @@
  * ==========================================
  * SHARED SOUND + ANIMATION UTILITIES
  *
- * Used by MissingNum.html, Muliplication.html
- * and Division.html.
+ * Used by MissingNum.html, Muliplication.html,
+ * Division.html and MultDivPractice.html.
  * ==========================================
  */
 
