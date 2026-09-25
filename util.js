@@ -1529,6 +1529,266 @@ function launchBouncingText() {
 
 /*
  * ==========================================
+ * GIANT ICE CREAM
+ *
+ * A huge vanilla ice cream cone rises up
+ * from the bottom, wiggles in the middle
+ * of the screen, then floats away.
+ * ==========================================
+ */
+
+function launchIceCream() {
+
+    const container =
+        document.getElementById("fireworks");
+
+    const size =
+        Math.min(window.innerWidth, window.innerHeight) * 0.6;
+
+
+    const iceCream =
+        document.createElement("div");
+
+    iceCream.textContent = "🍦";
+
+    iceCream.style.position = "absolute";
+    iceCream.style.left = "50%";
+    iceCream.style.top = "50%";
+    iceCream.style.fontSize = size + "px";
+    iceCream.style.lineHeight = "1";
+
+    container.appendChild(iceCream);
+
+
+    const riseFrom =
+        window.innerHeight / 2 + size;
+
+
+    const anim = iceCream.animate(
+        [
+            {
+                transform:
+                    `translate(-50%, -50%) translateY(${riseFrom}px) rotate(0deg)`,
+                opacity: 1
+            },
+            {
+                transform:
+                    "translate(-50%, -50%) translateY(0) rotate(0deg)",
+                opacity: 1,
+                offset: 0.3
+            },
+            {
+                transform:
+                    "translate(-50%, -50%) translateY(0) rotate(-10deg)",
+                opacity: 1,
+                offset: 0.4
+            },
+            {
+                transform:
+                    "translate(-50%, -50%) translateY(0) rotate(10deg)",
+                opacity: 1,
+                offset: 0.5
+            },
+            {
+                transform:
+                    "translate(-50%, -50%) translateY(0) rotate(-10deg)",
+                opacity: 1,
+                offset: 0.6
+            },
+            {
+                transform:
+                    "translate(-50%, -50%) translateY(0) rotate(0deg)",
+                opacity: 1,
+                offset: 0.7
+            },
+            {
+                transform:
+                    `translate(-50%, -50%) translateY(-${riseFrom}px) rotate(0deg)`,
+                opacity: 0
+            }
+        ],
+        {
+            duration: 3000,
+            easing: "ease-in-out",
+            fill: "forwards"
+        }
+    );
+
+    anim.onfinish = function () {
+
+        iceCream.remove();
+    };
+}
+
+
+/*
+ * ==========================================
+ * GIANT BIRTHDAY CAKE
+ *
+ * A huge birthday cake pops up in the middle
+ * of the screen with a bounce, surrounded by
+ * a burst of party sparkles.
+ * ==========================================
+ */
+
+function launchBirthdayCake() {
+
+    const container =
+        document.getElementById("fireworks");
+
+    const size =
+        Math.min(window.innerWidth, window.innerHeight) * 0.6;
+
+    const centerX =
+        window.innerWidth / 2;
+
+    const centerY =
+        window.innerHeight / 2;
+
+
+    const cake =
+        document.createElement("div");
+
+    cake.textContent = "🎂";
+
+    cake.style.position = "absolute";
+    cake.style.left = centerX + "px";
+    cake.style.top = centerY + "px";
+    cake.style.fontSize = size + "px";
+    cake.style.lineHeight = "1";
+
+    container.appendChild(cake);
+
+
+    const anim = cake.animate(
+        [
+            {
+                transform: "translate(-50%, -50%) scale(0)",
+                opacity: 1
+            },
+            {
+                transform: "translate(-50%, -50%) scale(1.15)",
+                opacity: 1,
+                offset: 0.2
+            },
+            {
+                transform: "translate(-50%, -50%) scale(0.95)",
+                opacity: 1,
+                offset: 0.3
+            },
+            {
+                transform: "translate(-50%, -50%) scale(1)",
+                opacity: 1,
+                offset: 0.4
+            },
+            {
+                transform: "translate(-50%, -50%) scale(1)",
+                opacity: 1,
+                offset: 0.8
+            },
+            {
+                transform: "translate(-50%, -50%) scale(1.1)",
+                opacity: 0
+            }
+        ],
+        {
+            duration: 3000,
+            easing: "ease-out",
+            fill: "forwards"
+        }
+    );
+
+    anim.onfinish = function () {
+
+        cake.remove();
+    };
+
+
+    /*
+     * Party sparkles bursting out from
+     * behind the cake.
+     */
+
+    const glyphs = [
+        "🎉",
+        "🎈",
+        "✨",
+        "🎊"
+    ];
+
+    const sparkleCount = 16;
+
+
+    for (
+        let i = 0;
+        i < sparkleCount;
+        i++
+    ) {
+
+        const sparkle =
+            document.createElement("div");
+
+        sparkle.textContent =
+            glyphs[
+                Math.floor(Math.random() * glyphs.length)
+            ];
+
+        sparkle.style.position = "absolute";
+        sparkle.style.left = centerX + "px";
+        sparkle.style.top = centerY + "px";
+        sparkle.style.fontSize =
+            (28 + Math.random() * 16) + "px";
+
+        container.appendChild(sparkle);
+
+
+        const angle =
+            (Math.PI * 2 / sparkleCount) * i;
+
+        const distance =
+            size * 0.6 + Math.random() * 120;
+
+        const dx = Math.cos(angle) * distance;
+        const dy = Math.sin(angle) * distance;
+
+
+        const sparkleAnim = sparkle.animate(
+            [
+                {
+                    transform:
+                        "translate(-50%, -50%) translate(0, 0) scale(0.3)",
+                    opacity: 0
+                },
+                {
+                    transform:
+                        `translate(-50%, -50%) translate(${dx}px, ${dy}px) scale(1)`,
+                    opacity: 1,
+                    offset: 0.6
+                },
+                {
+                    transform:
+                        `translate(-50%, -50%) translate(${dx}px, ${dy}px) scale(1)`,
+                    opacity: 0
+                }
+            ],
+            {
+                duration: 1600,
+                delay: 300,
+                easing: "ease-out",
+                fill: "both"
+            }
+        );
+
+        sparkleAnim.onfinish = function () {
+
+            sparkle.remove();
+        };
+    }
+}
+
+
+/*
+ * ==========================================
  * HAPPY EFFECTS
  *
  * One is chosen at random per correct answer.
@@ -1548,7 +1808,9 @@ const HAPPY_EFFECTS = [
     launchCats,
     launchDogs,
     launchFlamingos,
-    launchBouncingText
+    launchBouncingText,
+    launchIceCream,
+    launchBirthdayCake
 ];
 
 
