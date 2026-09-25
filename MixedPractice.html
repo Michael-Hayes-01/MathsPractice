@@ -3,7 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Missing Number Practice</title>
+    <title>Mixed Practice</title>
 
     <style>
         * {
@@ -125,7 +125,7 @@
             box-shadow: 0 4px 15px rgba(0, 0, 0, 0.1);
             text-align: center;
             width: 90%;
-            max-width: 650px;
+            max-width: 700px;
             position: relative;
             z-index: 2;
         }
@@ -156,7 +156,7 @@
             border: none;
             border-radius: 0;
             margin: 0;
-            padding: 10px 22px;
+            padding: 10px 18px;
             font-size: 18px;
             cursor: pointer;
             background: #eee;
@@ -177,19 +177,20 @@
            ========================= */
 
         .equation {
-            font-size: 36px;
+            font-size: 42px;
             font-weight: bold;
-            margin: 30px 0;
+            margin: 35px 0;
             display: flex;
             justify-content: center;
             align-items: center;
-            gap: 12px;
+            gap: 14px;
         }
 
         .answer-input {
-            width: 100px;
-            height: 55px;
-            font-size: 30px;
+            width: 110px;
+            height: 60px;
+            font-size: 34px;
+            font-weight: bold;
             text-align: center;
             border: 2px solid #888;
             border-radius: 6px;
@@ -200,7 +201,6 @@
             border-color: #333;
         }
 
-        /* Remove number input arrows */
         .answer-input::-webkit-inner-spin-button,
         .answer-input::-webkit-outer-spin-button {
             -webkit-appearance: none;
@@ -212,7 +212,7 @@
            ========================= */
 
         .actions button {
-            padding: 12px 28px;
+            padding: 13px 30px;
             font-size: 18px;
             border: none;
             border-radius: 6px;
@@ -327,20 +327,25 @@
                 font-size: 28px;
             }
 
+            .toggle {
+                flex-wrap: wrap;
+                justify-content: center;
+            }
+
             .toggle button {
-                padding: 9px 12px;
+                padding: 9px 10px;
                 font-size: 15px;
             }
 
             .equation {
-                font-size: 28px;
+                font-size: 30px;
                 gap: 8px;
             }
 
             .answer-input {
-                width: 75px;
-                height: 48px;
-                font-size: 26px;
+                width: 80px;
+                height: 50px;
+                font-size: 28px;
             }
         }
     </style>
@@ -348,22 +353,22 @@
 
 <body>
 
-<!-- Fireworks are created here -->
 <div id="fireworks"></div>
 
 <div class="container">
 
-    <h1>Missing Number Practice</h1>
+    <h1>Mixed Practice</h1>
 
     <!-- =========================
-         ADD / SUBTRACT / RANDOM
+         ADD / SUBTRACT / MULTIPLY /
+         DIVIDE / RANDOM
          ========================= -->
 
     <div class="toggle-container">
 
         <div class="toggle">
 
-            <button id="addBtn" class="active">
+            <button id="addBtn">
                 Add +
             </button>
 
@@ -371,7 +376,15 @@
                 Subtract −
             </button>
 
-            <button id="randomBtn">
+            <button id="multiplyBtn">
+                Multiply ×
+            </button>
+
+            <button id="divideBtn">
+                Divide ÷
+            </button>
+
+            <button id="randomBtn" class="active">
                 Random
             </button>
 
@@ -379,15 +392,7 @@
 
     </div>
 
-    <!-- =========================
-         EQUATION
-         ========================= -->
-
     <div class="equation" id="equation"></div>
-
-    <!-- =========================
-         ACTION BUTTONS
-         ========================= -->
 
     <div class="actions">
 
@@ -401,7 +406,6 @@
 
     </div>
 
-    <!-- Feedback -->
     <div id="message"></div>
 
 </div>
@@ -432,11 +436,11 @@
      * Remembers the unsolved question for each
      * mode (and which mode was active), so
      * switching modes and back - or refreshing
-     * the page - restores it instead of losing
-     * progress.
+     * the page - restores it instead of letting
+     * the user skip it.
      */
 
-    const STORAGE_KEY = "missingNumberPracticeState";
+    const STORAGE_KEY = "mixedPracticeState";
 
 
     function loadState() {
@@ -463,7 +467,7 @@
                 STORAGE_KEY,
                 JSON.stringify({
                     selectedMode: selectedMode,
-                    pendingByMode: pendingByMode
+                    pending: pending
                 })
             );
 
@@ -473,17 +477,58 @@
 
     const persistedState = loadState();
 
-    let pendingByMode =
-        persistedState.pendingByMode || {
-            add: null,
-            subtract: null,
-            random: null
-        };
+    /*
+     * Unsolved questions, keyed by mode.
+     */
+
+    let pending =
+        persistedState.pending || {};
 
     let selectedMode =
-        persistedState.selectedMode || "add";
+        persistedState.selectedMode || "random";
 
-    let currentOperation = selectedMode;
+
+    function answerInputHTML() {
+
+        return `
+            <input
+                type="number"
+                id="answer"
+                class="answer-input"
+                aria-label="Missing number"
+                autocomplete="off"
+            >
+        `;
+    }
+
+
+    /*
+     * ==========================================
+     * BUILD EQUATION
+     *
+     * Takes the three parts of "a op b = c"
+     * and which one is missing (0, 1 or 2).
+     * ==========================================
+     */
+
+    function buildEquation(a, operator, b, c, missing) {
+
+        const parts = [a, b, c].map(function(value, index) {
+
+            return index === missing
+                ? answerInputHTML()
+                : `<span>${value}</span>`;
+
+        });
+
+        return `
+            ${parts[0]}
+            <span>${operator}</span>
+            ${parts[1]}
+            <span>=</span>
+            ${parts[2]}
+        `;
+    }
 
 
     /*
@@ -497,104 +542,130 @@
         /*
          * Determine operation.
          *
-         * Add:
-         *     Always addition.
-         *
-         * Subtract:
-         *     Always subtraction.
-         *
-         * Random:
-         *     Approximately 50/50.
+         * Random picks any of the four
+         * operations for each question.
          */
 
-        if (selectedMode === "random") {
+        const operations = [
+            "add",
+            "subtract",
+            "multiply",
+            "divide"
+        ];
 
-            currentOperation =
-                Math.random() < 0.5
-                    ? "add"
-                    : "subtract";
-
-        } else {
-
-            currentOperation =
-                selectedMode;
-        }
-
-
-        let num1;
-        let num2;
-        let num3;
-
-
-        /*
-         * ======================================
-         * ADDITION
-         * ======================================
-         */
-
-        if (currentOperation === "add") {
-
-            num1 =
-                Math.floor(Math.random() * 50) + 1;
-
-            num2 =
-                Math.floor(Math.random() * 50) + 1;
-
-            num3 =
-                num1 + num2;
-        }
-
-
-        /*
-         * ======================================
-         * SUBTRACTION
-         *
-         * Num1 >= Num2
-         * ======================================
-         */
-
-        else {
-
-            num1 =
-                Math.floor(Math.random() * 50) + 1;
-
-            num2 =
-                Math.floor(
-                    Math.random() * num1
-                ) + 1;
-
-            num3 =
-                num1 - num2;
-        }
+        const operation =
+            selectedMode === "random"
+                ? operations[Math.floor(Math.random() * operations.length)]
+                : selectedMode;
 
 
         /*
          * Randomly choose which number is missing.
          *
-         * 0 = Num1
-         * 1 = Num2
-         * 2 = Num3
+         * 0 = first number
+         * 1 = second number
+         * 2 = answer
          */
 
-        const missingNumber =
+        const missing =
             Math.floor(Math.random() * 3);
 
 
-        const equation =
-            document.getElementById(
-                "equation"
-            );
-
-        const message =
-            document.getElementById(
-                "message"
-            );
+        let a;
+        let b;
+        let c;
+        let operator;
 
 
-        message.textContent = "";
+        /*
+         * ======================================
+         * ADDITION: a + b = c  (a, b 1-50)
+         * ======================================
+         */
 
-        message.className = "";
+        if (operation === "add") {
 
+            a = Math.floor(Math.random() * 50) + 1;
+            b = Math.floor(Math.random() * 50) + 1;
+            c = a + b;
+
+            operator = "+";
+        }
+
+
+        /*
+         * ======================================
+         * SUBTRACTION: a − b = c  (a >= b)
+         * ======================================
+         */
+
+        else if (operation === "subtract") {
+
+            a = Math.floor(Math.random() * 50) + 1;
+            b = Math.floor(Math.random() * a) + 1;
+            c = a - b;
+
+            operator = "−";
+        }
+
+
+        /*
+         * ======================================
+         * MULTIPLICATION / DIVISION
+         *
+         * Uses a random times table from 2-12
+         * and another factor from 1-12, so all
+         * division answers are whole numbers.
+         * ======================================
+         */
+
+        else {
+
+            const table =
+                Math.floor(Math.random() * 11) + 2;
+
+            const otherNumber =
+                Math.floor(Math.random() * 12) + 1;
+
+            const product =
+                table * otherNumber;
+
+
+            if (operation === "multiply") {
+
+                /*
+                 * Randomly put the table first
+                 * or second.
+                 */
+
+                if (Math.random() < 0.5) {
+
+                    a = table;
+                    b = otherNumber;
+
+                } else {
+
+                    a = otherNumber;
+                    b = table;
+                }
+
+                c = product;
+
+                operator = "×";
+
+            } else {
+
+                a = product;
+                b = table;
+                c = otherNumber;
+
+                operator = "÷";
+            }
+        }
+
+
+        correctAnswer =
+            [a, b, c][missing];
 
         answerSubmitted = false;
 
@@ -603,113 +674,19 @@
         document.getElementById("generateBtn").disabled = true;
 
 
-        /*
-         * Choose the operator.
-         */
+        const equation =
+            document.getElementById("equation");
 
-        const operator =
-            currentOperation === "add"
-                ? "+"
-                : "−";
+        const message =
+            document.getElementById("message");
 
 
-        /*
-         * ======================================
-         * NUM1 MISSING
-         * ======================================
-         */
-
-        if (missingNumber === 0) {
-
-            correctAnswer = num1;
+        message.textContent = "";
+        message.className = "";
 
 
-            equation.innerHTML = `
-
-                <input
-                    type="number"
-                    id="answer"
-                    class="answer-input"
-                    aria-label="Missing number"
-                    autocomplete="off"
-                >
-
-                <span>${operator}</span>
-
-                <span>${num2}</span>
-
-                <span>=</span>
-
-                <span>${num3}</span>
-
-            `;
-        }
-
-
-        /*
-         * ======================================
-         * NUM2 MISSING
-         * ======================================
-         */
-
-        else if (missingNumber === 1) {
-
-            correctAnswer = num2;
-
-
-            equation.innerHTML = `
-
-                <span>${num1}</span>
-
-                <span>${operator}</span>
-
-                <input
-                    type="number"
-                    id="answer"
-                    class="answer-input"
-                    aria-label="Missing number"
-                    autocomplete="off"
-                >
-
-                <span>=</span>
-
-                <span>${num3}</span>
-
-            `;
-        }
-
-
-        /*
-         * ======================================
-         * NUM3 MISSING
-         * ======================================
-         */
-
-        else {
-
-            correctAnswer = num3;
-
-
-            equation.innerHTML = `
-
-                <span>${num1}</span>
-
-                <span>${operator}</span>
-
-                <span>${num2}</span>
-
-                <span>=</span>
-
-                <input
-                    type="number"
-                    id="answer"
-                    class="answer-input"
-                    aria-label="Missing number"
-                    autocomplete="off"
-                >
-
-            `;
-        }
+        equation.innerHTML =
+            buildEquation(a, operator, b, c, missing);
 
 
         /*
@@ -717,17 +694,13 @@
          * question for the current mode.
          */
 
-        pendingByMode[selectedMode] = {
+        pending[selectedMode] = {
             equationHTML: equation.innerHTML,
             correctAnswer: correctAnswer
         };
 
         saveState();
 
-
-        /*
-         * Put the cursor in the answer box.
-         */
 
         document
             .getElementById("answer")
@@ -737,7 +710,7 @@
 
     /*
      * ==========================================
-     * LOAD QUESTION FOR MODE
+     * LOAD QUESTION
      *
      * Restores the unsolved question left
      * behind for this mode, or generates a
@@ -745,10 +718,10 @@
      * ==========================================
      */
 
-    function loadQuestionForMode() {
+    function loadQuestion() {
 
         const saved =
-            pendingByMode[selectedMode];
+            pending[selectedMode];
 
         if (!saved) {
 
@@ -762,18 +735,14 @@
             saved.correctAnswer;
 
 
-        const equation =
-            document.getElementById("equation");
-
         const message =
             document.getElementById("message");
 
 
-        equation.innerHTML =
+        document.getElementById("equation").innerHTML =
             saved.equationHTML;
 
         message.textContent = "";
-
         message.className = "";
 
 
@@ -792,9 +761,33 @@
 
     /*
      * ==========================================
-     * SET MODE
+     * MODE BUTTONS
      * ==========================================
      */
+
+    const MODE_BUTTON_IDS = {
+        add: "addBtn",
+        subtract: "subtractBtn",
+        multiply: "multiplyBtn",
+        divide: "divideBtn",
+        random: "randomBtn"
+    };
+
+
+    function updateActiveButtons() {
+
+        Object.keys(MODE_BUTTON_IDS).forEach(function(mode) {
+
+            document
+                .getElementById(MODE_BUTTON_IDS[mode])
+                .classList.toggle(
+                    "active",
+                    mode === selectedMode
+                );
+
+        });
+    }
+
 
     function setMode(mode) {
 
@@ -802,59 +795,26 @@
 
         saveState();
 
+        updateActiveButtons();
 
-        /*
-         * Remove active state from all buttons.
-         */
-
-        document
-            .getElementById("addBtn")
-            .classList.remove("active");
-
-        document
-            .getElementById("subtractBtn")
-            .classList.remove("active");
-
-        document
-            .getElementById("randomBtn")
-            .classList.remove("active");
-
-
-        /*
-         * Activate selected button.
-         */
-
-        if (mode === "add") {
-
-            document
-                .getElementById("addBtn")
-                .classList.add("active");
-        }
-
-
-        if (mode === "subtract") {
-
-            document
-                .getElementById("subtractBtn")
-                .classList.add("active");
-        }
-
-
-        if (mode === "random") {
-
-            document
-                .getElementById("randomBtn")
-                .classList.add("active");
-        }
-
-
-        /*
-         * Restore this mode's unsolved
-         * question, or generate a new one.
-         */
-
-        loadQuestionForMode();
+        loadQuestion();
     }
+
+
+    Object.keys(MODE_BUTTON_IDS).forEach(function(mode) {
+
+        document
+            .getElementById(MODE_BUTTON_IDS[mode])
+            .addEventListener(
+                "click",
+                function() {
+
+                    setMode(mode);
+
+                }
+            );
+
+    });
 
 
     /*
@@ -873,7 +833,7 @@
 
 
         /*
-         * No answer entered.
+         * Empty answer.
          */
 
         if (input.value.trim() === "") {
@@ -905,9 +865,6 @@
             /*
              * Only play the happy sound and
              * effect once per distinct answer.
-             * Resubmitting the same answer
-             * (e.g. pressing Submit again)
-             * stays silent.
              */
 
             const isNewAnswer =
@@ -919,11 +876,6 @@
             if (isNewAnswer) {
 
                 playHappySound();
-
-                /*
-                 * Green flash
-                 * + a random happy effect
-                 */
 
                 celebrateCorrectAnswer();
             }
@@ -937,8 +889,8 @@
 
 
             /*
-             * The next Enter will generate
-             * a new problem.
+             * Next Enter generates
+             * a new question.
              */
 
             answerSubmitted = true;
@@ -951,7 +903,7 @@
              * remember for this mode.
              */
 
-            pendingByMode[selectedMode] = null;
+            delete pending[selectedMode];
 
             saveState();
         }
@@ -992,12 +944,6 @@
                 "incorrect";
 
 
-            /*
-             * Keep this question active.
-             *
-             * Enter will submit again.
-             */
-
             answerSubmitted = false;
 
             input.focus();
@@ -1007,49 +953,7 @@
 
     /*
      * ==========================================
-     * MODE BUTTONS
-     * ==========================================
-     */
-
-    document
-        .getElementById("addBtn")
-        .addEventListener(
-            "click",
-            function () {
-
-                setMode("add");
-
-            }
-        );
-
-
-    document
-        .getElementById("subtractBtn")
-        .addEventListener(
-            "click",
-            function () {
-
-                setMode("subtract");
-
-            }
-        );
-
-
-    document
-        .getElementById("randomBtn")
-        .addEventListener(
-            "click",
-            function () {
-
-                setMode("random");
-
-            }
-        );
-
-
-    /*
-     * ==========================================
-     * SUBMIT BUTTON
+     * SUBMIT / GENERATE BUTTONS
      * ==========================================
      */
 
@@ -1057,7 +961,7 @@
         .getElementById("submitBtn")
         .addEventListener(
             "click",
-            function () {
+            function() {
 
                 submitAnswer();
 
@@ -1065,17 +969,11 @@
         );
 
 
-    /*
-     * ==========================================
-     * GENERATE BUTTON
-     * ==========================================
-     */
-
     document
         .getElementById("generateBtn")
         .addEventListener(
             "click",
-            function () {
+            function() {
 
                 generateProblem();
 
@@ -1100,7 +998,7 @@
 
     document.addEventListener(
         "keydown",
-        function (event) {
+        function(event) {
 
             if (event.key !== "Enter") {
                 return;
@@ -1129,37 +1027,15 @@
      * START GAME
      * ==========================================
      *
-     * Starts on Add, unless a previous
-     * mode/question was saved.
+     * Starts on Random, unless a previous
+     * mode was saved.
      */
 
     (function startGame() {
 
-        document
-            .getElementById("addBtn")
-            .classList.remove("active");
+        updateActiveButtons();
 
-        document
-            .getElementById("subtractBtn")
-            .classList.remove("active");
-
-        document
-            .getElementById("randomBtn")
-            .classList.remove("active");
-
-
-        const buttonIds = {
-            add: "addBtn",
-            subtract: "subtractBtn",
-            random: "randomBtn"
-        };
-
-        document
-            .getElementById(buttonIds[selectedMode])
-            .classList.add("active");
-
-
-        loadQuestionForMode();
+        loadQuestion();
 
     })();
 
@@ -1167,4 +1043,3 @@
 
 </body>
 </html>
-```

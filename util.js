@@ -3,7 +3,8 @@
  * SHARED SOUND + ANIMATION UTILITIES
  *
  * Used by MissingNum.html, Muliplication.html,
- * Division.html and MultDivPractice.html.
+ * Division.html, MultDivPractice.html and
+ * MixedPractice.html.
  * ==========================================
  */
 

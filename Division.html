@@ -352,585 +352,410 @@
 
 <body>
 
-    <div id="fireworks"></div>
+<div id="fireworks"></div>
 
-    <div class="container">
+<div class="container">
 
-        <h1>Division Practice</h1>
+    <h1>Division Practice</h1>
 
-        <div class="table-label">
-            Choose a times table
-        </div>
+    <div class="table-label">
+        Choose a times table
+    </div>
 
-        <div class="table-selector">
+    <div class="table-selector">
 
-            <button data-table="2">2</button>
-            <button data-table="3" class="active">3</button>
-            <button data-table="4">4</button>
-            <button data-table="5">5</button>
-            <button data-table="6">6</button>
-            <button data-table="7">7</button>
-            <button data-table="8">8</button>
-            <button data-table="9">9</button>
-            <button data-table="10">10</button>
-            <button data-table="11">11</button>
-            <button data-table="12">12</button>
-
-        </div>
-
-        <div class="equation" id="equation"></div>
-
-        <div class="actions">
-
-            <button id="submitBtn">
-                Submit
-            </button>
-
-            <button id="generateBtn" disabled>
-                Generate
-            </button>
-
-        </div>
-
-        <div id="message"></div>
+        <button data-table="2">2</button>
+        <button data-table="3" class="active">3</button>
+        <button data-table="4">4</button>
+        <button data-table="5">5</button>
+        <button data-table="6">6</button>
+        <button data-table="7">7</button>
+        <button data-table="8">8</button>
+        <button data-table="9">9</button>
+        <button data-table="10">10</button>
+        <button data-table="11">11</button>
+        <button data-table="12">12</button>
 
     </div>
 
+    <div class="equation" id="equation"></div>
 
-    <script src="util.js"></script>
+    <div class="actions">
 
-    <script>
+        <button id="submitBtn">
+            Submit
+        </button>
+
+        <button id="generateBtn" disabled>
+            Generate
+        </button>
+
+    </div>
+
+    <div id="message"></div>
+
+</div>
+
+
+<script src="util.js"></script>
+
+<script>
+
+    /*
+     * ==========================================
+     * GAME STATE
+     * ==========================================
+     */
+
+    let selectedTable = 3;
+
+    let correctAnswer = 0;
+
+    let answerSubmitted = false;
+
+    let lastEffectAnswer = null;
+
+
+    /*
+     * ==========================================
+     * PERSISTED STATE
+     * ==========================================
+     *
+     * Keeps the in-progress question for each
+     * times table, so refreshing the page or
+     * switching tables and back does not let
+     * the user skip an unanswered question.
+     */
+
+    const STORAGE_KEY = "divisionPracticeState";
+
+
+    function loadState() {
+
+        try {
+
+            const raw =
+                localStorage.getItem(STORAGE_KEY);
+
+            return raw ? JSON.parse(raw) : {};
+
+        } catch (e) {
+
+            return {};
+        }
+    }
+
+
+    function saveState(state) {
+
+        try {
+
+            localStorage.setItem(
+                STORAGE_KEY,
+                JSON.stringify(state)
+            );
+
+        } catch (e) {}
+    }
+
+
+    function saveCurrentProblem(table) {
+
+        const state = loadState();
+
+        if (!state.problems) {
+
+            state.problems = {};
+        }
+
+        state.problems[table] = {
+            correctAnswer: correctAnswer,
+            equationHTML:
+                document.getElementById("equation").innerHTML
+        };
+
+        state.selectedTable = table;
+
+        saveState(state);
+    }
+
+
+    /*
+     * ==========================================
+     * GENERATE QUESTION
+     * ==========================================
+     *
+     * The selected table is always involved.
+     *
+     * Example with table 3:
+     *
+     * 9 ÷ 3 = ?
+     *
+     * ? ÷ 3 = 4
+     *
+     * 12 ÷ ? = 4
+     *
+     * All answers are whole numbers.
+     */
+
+    function generateProblem() {
+
+        const table = selectedTable;
+
 
         /*
-         * ==========================================
-         * GAME STATE
-         * ==========================================
+         * Pick a multiplier from 1 to 12.
          */
 
-        let selectedTable = 3;
-
-        let correctAnswer = 0;
-
-        let answerSubmitted = false;
-
-        let lastEffectAnswer = null;
+        const multiplier =
+            Math.floor(Math.random() * 12) + 1;
 
 
         /*
-         * ==========================================
-         * PERSISTED STATE
-         * ==========================================
-         *
-         * Keeps the in-progress question for each
-         * times table, so refreshing the page or
-         * switching tables and back does not let
-         * the user skip an unanswered question.
+         * Calculate the product.
          */
 
-        const STORAGE_KEY = "divisionPracticeState";
-
-
-        function loadState() {
-
-            try {
-
-                const raw =
-                    localStorage.getItem(STORAGE_KEY);
-
-                return raw ? JSON.parse(raw) : {};
-
-            } catch (e) {
-
-                return {};
-            }
-        }
-
-
-        function saveState(state) {
-
-            try {
-
-                localStorage.setItem(
-                    STORAGE_KEY,
-                    JSON.stringify(state)
-                );
-
-            } catch (e) {}
-        }
-
-
-        function saveCurrentProblem(table) {
-
-            const state = loadState();
-
-            if (!state.problems) {
-
-                state.problems = {};
-            }
-
-            state.problems[table] = {
-                correctAnswer: correctAnswer,
-                equationHTML:
-                    document.getElementById("equation").innerHTML
-            };
-
-            state.selectedTable = table;
-
-            saveState(state);
-        }
+        const product =
+            table * multiplier;
 
 
         /*
-         * ==========================================
-         * GENERATE QUESTION
-         * ==========================================
+         * Reset state.
+         */
+
+        correctAnswer = 0;
+
+        answerSubmitted = false;
+
+        lastEffectAnswer = null;
+
+        document.getElementById("generateBtn").disabled = true;
+
+
+        const equation =
+            document.getElementById("equation");
+
+        const message =
+            document.getElementById("message");
+
+
+        message.textContent = "";
+        message.className = "";
+
+
+        /*
+         * Pick one of three question formats.
          *
-         * The selected table is always involved.
+         * 0 = product ÷ table = ?
          *
-         * Example with table 3:
+         * 1 = ? ÷ table = multiplier
+         *
+         * 2 = product ÷ ? = table
+         */
+
+        const questionType =
+            Math.floor(Math.random() * 3);
+
+
+        /*
+         * ======================================
+         * TYPE 1
          *
          * 9 ÷ 3 = ?
          *
+         * Answer = 3
+         * ======================================
+         */
+
+        if (questionType === 0) {
+
+            correctAnswer = multiplier;
+
+
+            equation.innerHTML = `
+
+                <span>${product}</span>
+
+                <span>÷</span>
+
+                <span>${table}</span>
+
+                <span>=</span>
+
+                <input
+                    type="number"
+                    id="answer"
+                    class="answer-input"
+                    aria-label="Missing number"
+                    autocomplete="off"
+                >
+
+            `;
+        }
+
+
+        /*
+         * ======================================
+         * TYPE 2
+         *
          * ? ÷ 3 = 4
+         *
+         * Answer = 12
+         * ======================================
+         */
+
+        else if (questionType === 1) {
+
+            correctAnswer = product;
+
+
+            equation.innerHTML = `
+
+                <input
+                    type="number"
+                    id="answer"
+                    class="answer-input"
+                    aria-label="Missing number"
+                    autocomplete="off"
+                >
+
+                <span>÷</span>
+
+                <span>${table}</span>
+
+                <span>=</span>
+
+                <span>${multiplier}</span>
+
+            `;
+        }
+
+
+        /*
+         * ======================================
+         * TYPE 3
          *
          * 12 ÷ ? = 4
          *
-         * All answers are whole numbers.
+         * Answer = 3
+         * ======================================
          */
 
-        function generateProblem() {
+        else {
 
-            const table = selectedTable;
-
-
-            /*
-             * Pick a multiplier from 1 to 12.
-             */
-
-            const multiplier =
-                Math.floor(Math.random() * 12) + 1;
+            correctAnswer = table;
 
 
-            /*
-             * Calculate the product.
-             */
+            equation.innerHTML = `
 
-            const product =
-                table * multiplier;
+                <span>${product}</span>
 
+                <span>÷</span>
 
-            /*
-             * Reset state.
-             */
+                <input
+                    type="number"
+                    id="answer"
+                    class="answer-input"
+                    aria-label="Missing number"
+                    autocomplete="off"
+                >
 
-            correctAnswer = 0;
+                <span>=</span>
 
-            answerSubmitted = false;
+                <span>${multiplier}</span>
 
-            lastEffectAnswer = null;
-
-            document.getElementById("generateBtn").disabled = true;
-
-
-            const equation =
-                document.getElementById("equation");
-
-            const message =
-                document.getElementById("message");
-
-
-            message.textContent = "";
-            message.className = "";
-
-
-            /*
-             * Pick one of three question formats.
-             *
-             * 0 = product ÷ table = ?
-             *
-             * 1 = ? ÷ table = multiplier
-             *
-             * 2 = product ÷ ? = table
-             */
-
-            const questionType =
-                Math.floor(Math.random() * 3);
-
-
-            /*
-             * ======================================
-             * TYPE 1
-             *
-             * 9 ÷ 3 = ?
-             *
-             * Answer = 3
-             * ======================================
-             */
-
-            if (questionType === 0) {
-
-                correctAnswer = multiplier;
-
-
-                equation.innerHTML = `
-
-                    <span>${product}</span>
-
-                    <span>÷</span>
-
-                    <span>${table}</span>
-
-                    <span>=</span>
-
-                    <input
-                        type="number"
-                        id="answer"
-                        class="answer-input"
-                        aria-label="Missing number"
-                        autocomplete="off"
-                    >
-
-                `;
-            }
-
-
-            /*
-             * ======================================
-             * TYPE 2
-             *
-             * ? ÷ 3 = 4
-             *
-             * Answer = 12
-             * ======================================
-             */
-
-            else if (questionType === 1) {
-
-                correctAnswer = product;
-
-
-                equation.innerHTML = `
-
-                    <input
-                        type="number"
-                        id="answer"
-                        class="answer-input"
-                        aria-label="Missing number"
-                        autocomplete="off"
-                    >
-
-                    <span>÷</span>
-
-                    <span>${table}</span>
-
-                    <span>=</span>
-
-                    <span>${multiplier}</span>
-
-                `;
-            }
-
-
-            /*
-             * ======================================
-             * TYPE 3
-             *
-             * 12 ÷ ? = 4
-             *
-             * Answer = 3
-             * ======================================
-             */
-
-            else {
-
-                correctAnswer = table;
-
-
-                equation.innerHTML = `
-
-                    <span>${product}</span>
-
-                    <span>÷</span>
-
-                    <input
-                        type="number"
-                        id="answer"
-                        class="answer-input"
-                        aria-label="Missing number"
-                        autocomplete="off"
-                    >
-
-                    <span>=</span>
-
-                    <span>${multiplier}</span>
-
-                `;
-            }
-
-
-            /*
-             * Focus the answer box.
-             */
-
-            document
-                .getElementById("answer")
-                .focus();
-
-
-            /*
-             * Persist this question so it survives
-             * a refresh or switching tables and back.
-             */
-
-            saveCurrentProblem(table);
+            `;
         }
 
 
         /*
-         * ==========================================
-         * RESTORE OR GENERATE QUESTION
-         * ==========================================
-         *
-         * If there is already an unanswered question
-         * saved for this table, show that one again
-         * instead of generating a new one. This stops
-         * the user from "skipping" a question by
-         * switching tables and back, or by refreshing.
-         * ==========================================
+         * Focus the answer box.
          */
 
-        function restoreOrGenerateProblem(table) {
-
-            const state = loadState();
-
-            const stored =
-                state.problems && state.problems[table];
-
-
-            if (!stored) {
-
-                generateProblem();
-
-                return;
-            }
-
-
-            correctAnswer = stored.correctAnswer;
-
-            answerSubmitted = false;
-
-            lastEffectAnswer = null;
-
-            document.getElementById("generateBtn").disabled = true;
-
-
-            const equation =
-                document.getElementById("equation");
-
-            const message =
-                document.getElementById("message");
-
-
-            message.textContent = "";
-            message.className = "";
-
-            equation.innerHTML = stored.equationHTML;
-
-
-            document
-                .getElementById("answer")
-                .focus();
-        }
+        document
+            .getElementById("answer")
+            .focus();
 
 
         /*
-         * ==========================================
-         * SELECT TIMES TABLE
-         * ==========================================
+         * Persist this question so it survives
+         * a refresh or switching tables and back.
          */
 
-        function setTable(table) {
-
-            selectedTable = table;
-
-
-            /*
-             * Remove active state.
-             */
-
-            document
-                .querySelectorAll(
-                    ".table-selector button"
-                )
-                .forEach(function(button) {
-
-                    button.classList.remove(
-                        "active"
-                    );
-
-                });
+        saveCurrentProblem(table);
+    }
 
 
-            /*
-             * Activate selected table.
-             */
+    /*
+     * ==========================================
+     * RESTORE OR GENERATE QUESTION
+     * ==========================================
+     *
+     * If there is already an unanswered question
+     * saved for this table, show that one again
+     * instead of generating a new one. This stops
+     * the user from "skipping" a question by
+     * switching tables and back, or by refreshing.
+     * ==========================================
+     */
 
-            document
-                .querySelector(
-                    `.table-selector button[data-table="${table}"]`
-                )
-                .classList.add("active");
+    function restoreOrGenerateProblem(table) {
+
+        const state = loadState();
+
+        const stored =
+            state.problems && state.problems[table];
 
 
-            /*
-             * Restore this table's unanswered question,
-             * or generate a new one if it doesn't have one.
-             */
+        if (!stored) {
 
-            restoreOrGenerateProblem(table);
+            generateProblem();
+
+            return;
         }
 
 
-        /*
-         * ==========================================
-         * SUBMIT ANSWER
-         * ==========================================
-         */
+        correctAnswer = stored.correctAnswer;
 
-        function submitAnswer() {
+        answerSubmitted = false;
 
-            const input =
-                document.getElementById("answer");
+        lastEffectAnswer = null;
 
-            const message =
-                document.getElementById("message");
+        document.getElementById("generateBtn").disabled = true;
 
 
-            /*
-             * Empty answer.
-             */
+        const equation =
+            document.getElementById("equation");
 
-            if (input.value.trim() === "") {
-
-                message.textContent =
-                    "Please enter an answer.";
-
-                message.className =
-                    "incorrect";
-
-                input.focus();
-
-                return;
-            }
+        const message =
+            document.getElementById("message");
 
 
-            const userAnswer =
-                Number(input.value);
+        message.textContent = "";
+        message.className = "";
+
+        equation.innerHTML = stored.equationHTML;
 
 
-            /*
-             * ======================================
-             * CORRECT
-             * ======================================
-             */
-
-            if (userAnswer === correctAnswer) {
-
-                /*
-                 * Only play the happy sound and
-                 * effect once per distinct answer.
-                 * Resubmitting the same answer
-                 * (e.g. pressing Submit again)
-                 * stays silent.
-                 */
-
-                const isNewAnswer =
-                    userAnswer !== lastEffectAnswer;
-
-                lastEffectAnswer = userAnswer;
+        document
+            .getElementById("answer")
+            .focus();
+    }
 
 
-                if (isNewAnswer) {
+    /*
+     * ==========================================
+     * SELECT TIMES TABLE
+     * ==========================================
+     */
 
-                    playHappySound();
+    function setTable(table) {
 
-                    /*
-                     * Green flash
-                     * + a random happy effect
-                     */
-
-                    celebrateCorrectAnswer();
-                }
-
-
-                message.textContent =
-                    "Correct! 🎉";
-
-                message.className =
-                    "correct";
-
-
-                /*
-                 * Second Enter generates
-                 * the next question.
-                 */
-
-                answerSubmitted = true;
-
-                document.getElementById("generateBtn").disabled = false;
-            }
-
-
-            /*
-             * ======================================
-             * WRONG
-             * ======================================
-             */
-
-            else {
-
-                /*
-                 * Only play the sad sound and
-                 * red flash once per distinct
-                 * wrong answer.
-                 */
-
-                const isNewAnswer =
-                    userAnswer !== lastEffectAnswer;
-
-                lastEffectAnswer = userAnswer;
-
-
-                if (isNewAnswer) {
-
-                    playSadSound();
-
-                    flashRed();
-                }
-
-
-                message.textContent =
-                    "Wrong! Try again.";
-
-                message.className =
-                    "incorrect";
-
-
-                /*
-                 * Stay on the same question.
-                 */
-
-                answerSubmitted = false;
-
-                input.focus();
-            }
-        }
+        selectedTable = table;
 
 
         /*
-         * ==========================================
-         * TIMES TABLE BUTTONS
-         * ==========================================
+         * Remove active state.
          */
 
         document
@@ -939,141 +764,316 @@
             )
             .forEach(function(button) {
 
-                button.addEventListener(
-                    "click",
-                    function() {
-
-                        const table =
-                            Number(
-                                button.dataset.table
-                            );
-
-                        setTable(table);
-                    }
+                button.classList.remove(
+                    "active"
                 );
 
             });
 
 
         /*
-         * ==========================================
-         * SUBMIT BUTTON
-         * ==========================================
+         * Activate selected table.
          */
 
         document
-            .getElementById("submitBtn")
-            .addEventListener(
-                "click",
-                function() {
-
-                    submitAnswer();
-
-                }
-            );
+            .querySelector(
+                `.table-selector button[data-table="${table}"]`
+            )
+            .classList.add("active");
 
 
         /*
-         * ==========================================
-         * GENERATE BUTTON
-         * ==========================================
+         * Restore this table's unanswered question,
+         * or generate a new one if it doesn't have one.
          */
 
-        document
-            .getElementById("generateBtn")
-            .addEventListener(
-                "click",
-                function() {
+        restoreOrGenerateProblem(table);
+    }
 
-                    generateProblem();
 
-                }
-            );
+    /*
+     * ==========================================
+     * SUBMIT ANSWER
+     * ==========================================
+     */
+
+    function submitAnswer() {
+
+        const input =
+            document.getElementById("answer");
+
+        const message =
+            document.getElementById("message");
 
 
         /*
-         * ==========================================
-         * ENTER KEY
-         * ==========================================
-         *
-         * First Enter:
-         *     Submit
-         *
-         * Second Enter after correct:
-         *     Generate
-         *
-         * Wrong answer:
-         *     Enter remains Submit
+         * Empty answer.
          */
 
-        document.addEventListener(
-            "keydown",
-            function(event) {
+        if (input.value.trim() === "") {
 
-                if (event.key !== "Enter") {
-                    return;
+            message.textContent =
+                "Please enter an answer.";
+
+            message.className =
+                "incorrect";
+
+            input.focus();
+
+            return;
+        }
+
+
+        const userAnswer =
+            Number(input.value);
+
+
+        /*
+         * ======================================
+         * CORRECT
+         * ======================================
+         */
+
+        if (userAnswer === correctAnswer) {
+
+            /*
+             * Only play the happy sound and
+             * effect once per distinct answer.
+             * Resubmitting the same answer
+             * (e.g. pressing Submit again)
+             * stays silent.
+             */
+
+            const isNewAnswer =
+                userAnswer !== lastEffectAnswer;
+
+            lastEffectAnswer = userAnswer;
+
+
+            if (isNewAnswer) {
+
+                playHappySound();
+
+                /*
+                 * Green flash
+                 * + a random happy effect
+                 */
+
+                celebrateCorrectAnswer();
+            }
+
+
+            message.textContent =
+                "Correct! 🎉";
+
+            message.className =
+                "correct";
+
+
+            /*
+             * Second Enter generates
+             * the next question.
+             */
+
+            answerSubmitted = true;
+
+            document.getElementById("generateBtn").disabled = false;
+        }
+
+
+        /*
+         * ======================================
+         * WRONG
+         * ======================================
+         */
+
+        else {
+
+            /*
+             * Only play the sad sound and
+             * red flash once per distinct
+             * wrong answer.
+             */
+
+            const isNewAnswer =
+                userAnswer !== lastEffectAnswer;
+
+            lastEffectAnswer = userAnswer;
+
+
+            if (isNewAnswer) {
+
+                playSadSound();
+
+                flashRed();
+            }
+
+
+            message.textContent =
+                "Wrong! Try again.";
+
+            message.className =
+                "incorrect";
+
+
+            /*
+             * Stay on the same question.
+             */
+
+            answerSubmitted = false;
+
+            input.focus();
+        }
+    }
+
+
+    /*
+     * ==========================================
+     * TIMES TABLE BUTTONS
+     * ==========================================
+     */
+
+    document
+        .querySelectorAll(
+            ".table-selector button"
+        )
+        .forEach(function(button) {
+
+            button.addEventListener(
+                "click",
+                function() {
+
+                    const table =
+                        Number(
+                            button.dataset.table
+                        );
+
+                    setTable(table);
                 }
+            );
 
-                event.preventDefault();
+        });
 
 
-                if (answerSubmitted) {
+    /*
+     * ==========================================
+     * SUBMIT BUTTON
+     * ==========================================
+     */
 
-                    generateProblem();
+    document
+        .getElementById("submitBtn")
+        .addEventListener(
+            "click",
+            function() {
 
-                } else {
-
-                    submitAnswer();
-
-                }
+                submitAnswer();
 
             }
         );
 
 
-        /*
-         * ==========================================
-         * START GAME
-         * ==========================================
-         *
-         * Starts on the 3 times table, unless a
-         * previous table/question was saved.
-         */
+    /*
+     * ==========================================
+     * GENERATE BUTTON
+     * ==========================================
+     */
 
-        (function startGame() {
+    document
+        .getElementById("generateBtn")
+        .addEventListener(
+            "click",
+            function() {
 
-            const state = loadState();
+                generateProblem();
 
-            const savedTable = state.selectedTable;
-
-            const savedButton =
-                savedTable &&
-                document.querySelector(
-                    `.table-selector button[data-table="${savedTable}"]`
-                );
+            }
+        );
 
 
-            if (savedButton) {
+    /*
+     * ==========================================
+     * ENTER KEY
+     * ==========================================
+     *
+     * First Enter:
+     *     Submit
+     *
+     * Second Enter after correct:
+     *     Generate
+     *
+     * Wrong answer:
+     *     Enter remains Submit
+     */
 
-                selectedTable = savedTable;
+    document.addEventListener(
+        "keydown",
+        function(event) {
 
-                document
-                    .querySelectorAll(".table-selector button")
-                    .forEach(function(button) {
-
-                        button.classList.remove("active");
-
-                    });
-
-                savedButton.classList.add("active");
+            if (event.key !== "Enter") {
+                return;
             }
 
+            event.preventDefault();
 
-            restoreOrGenerateProblem(selectedTable);
 
-        })();
+            if (answerSubmitted) {
 
-    </script>
+                generateProblem();
+
+            } else {
+
+                submitAnswer();
+
+            }
+
+        }
+    );
+
+
+    /*
+     * ==========================================
+     * START GAME
+     * ==========================================
+     *
+     * Starts on the 3 times table, unless a
+     * previous table/question was saved.
+     */
+
+    (function startGame() {
+
+        const state = loadState();
+
+        const savedTable = state.selectedTable;
+
+        const savedButton =
+            savedTable &&
+            document.querySelector(
+                `.table-selector button[data-table="${savedTable}"]`
+            );
+
+
+        if (savedButton) {
+
+            selectedTable = savedTable;
+
+            document
+                .querySelectorAll(".table-selector button")
+                .forEach(function(button) {
+
+                    button.classList.remove("active");
+
+                });
+
+            savedButton.classList.add("active");
+        }
+
+
+        restoreOrGenerateProblem(selectedTable);
+
+    })();
+
+</script>
 
 </body>
 </html>
