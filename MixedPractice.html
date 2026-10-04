@@ -173,6 +173,60 @@
         }
 
         /* =========================
+           TIMES TABLE SELECTOR
+           ========================= */
+
+        .table-label {
+            font-size: 18px;
+            font-weight: bold;
+            color: #555;
+            margin-bottom: 10px;
+        }
+
+        .table-selector {
+            display: flex;
+            justify-content: center;
+            flex-wrap: wrap;
+            gap: 5px;
+            margin-bottom: 30px;
+        }
+
+        .table-selector button {
+            width: 48px;
+            height: 42px;
+            border: 2px solid #333;
+            border-radius: 6px;
+            font-size: 17px;
+            font-weight: bold;
+            cursor: pointer;
+            background: #eee;
+            color: #333;
+        }
+
+        .table-selector button[data-table="any"] {
+            width: auto;
+            padding: 0 12px;
+        }
+
+        .table-selector button:hover {
+            background: #ddd;
+        }
+
+        .table-selector button.active {
+            background: #333;
+            color: white;
+        }
+
+        /*
+         * Times tables don't apply to
+         * add / subtract.
+         */
+
+        #tableSection.hidden {
+            display: none;
+        }
+
+        /* =========================
            EQUATION
            ========================= */
 
@@ -359,6 +413,12 @@
                 font-size: 15px;
             }
 
+            .table-selector button {
+                width: 42px;
+                height: 38px;
+                font-size: 15px;
+            }
+
             .equation {
                 font-size: 30px;
                 gap: 8px;
@@ -411,6 +471,36 @@
             <button id="randomBtn" class="active">
                 Random
             </button>
+
+        </div>
+
+    </div>
+
+    <!-- =========================
+         TIMES TABLES
+         (multiply / divide / random)
+         ========================= -->
+
+    <div id="tableSection">
+
+        <div class="table-label">
+            Choose times tables
+        </div>
+
+        <div class="table-selector">
+
+            <button data-table="2">2</button>
+            <button data-table="3">3</button>
+            <button data-table="4">4</button>
+            <button data-table="5">5</button>
+            <button data-table="6">6</button>
+            <button data-table="7">7</button>
+            <button data-table="8">8</button>
+            <button data-table="9">9</button>
+            <button data-table="10">10</button>
+            <button data-table="11">11</button>
+            <button data-table="12">12</button>
+            <button data-table="any" class="active">Any</button>
 
         </div>
 
@@ -491,6 +581,7 @@
                 STORAGE_KEY,
                 JSON.stringify({
                     selectedMode: selectedMode,
+                    selectedTables: selectedTables,
                     pending: pending
                 })
             );
@@ -502,7 +593,9 @@
     const persistedState = loadState();
 
     /*
-     * Unsolved questions, keyed by mode.
+     * Unsolved questions, keyed by mode, plus
+     * the times tables for modes that use them,
+     * e.g. "add", "divide:6,7,8" or "random:any".
      */
 
     let pending =
@@ -510,6 +603,35 @@
 
     let selectedMode =
         persistedState.selectedMode || "random";
+
+    /*
+     * A sorted array of tables 2-12 (one is
+     * picked at random for each new question),
+     * or "any" for any table 2-12.
+     */
+
+    let selectedTables =
+        persistedState.selectedTables || "any";
+
+
+    function usesTables() {
+
+        return selectedMode !== "add" &&
+            selectedMode !== "subtract";
+    }
+
+
+    function pendingKey() {
+
+        if (!usesTables()) {
+            return selectedMode;
+        }
+
+        return selectedMode + ":" +
+            (selectedTables === "any"
+                ? "any"
+                : selectedTables.join(","));
+    }
 
 
     function answerInputHTML() {
@@ -637,16 +759,21 @@
          * ======================================
          * MULTIPLICATION / DIVISION
          *
-         * Uses a random times table from 2-12
-         * and another factor from 1-12, so all
-         * division answers are whole numbers.
+         * Uses one of the selected times tables
+         * (any from 2-12 for "any") and another
+         * factor from 1-12, so all division
+         * answers are whole numbers.
          * ======================================
          */
 
         else {
 
             const table =
-                Math.floor(Math.random() * 11) + 2;
+                selectedTables === "any"
+                    ? Math.floor(Math.random() * 11) + 2
+                    : selectedTables[
+                        Math.floor(Math.random() * selectedTables.length)
+                    ];
 
             const otherNumber =
                 Math.floor(Math.random() * 12) + 1;
@@ -715,10 +842,11 @@
 
         /*
          * Remember this as the unsolved
-         * question for the current mode.
+         * question for the current mode
+         * (+ tables).
          */
 
-        pending[selectedMode] = {
+        pending[pendingKey()] = {
             equationHTML: equation.innerHTML,
             correctAnswer: correctAnswer
         };
@@ -745,7 +873,7 @@
     function loadQuestion() {
 
         const saved =
-            pending[selectedMode];
+            pending[pendingKey()];
 
         if (!saved) {
 
@@ -810,6 +938,28 @@
                 );
 
         });
+
+
+        document
+            .getElementById("tableSection")
+            .classList.toggle("hidden", !usesTables());
+
+
+        document
+            .querySelectorAll(".table-selector button")
+            .forEach(function(button) {
+
+                const table =
+                    button.dataset.table;
+
+                button.classList.toggle(
+                    "active",
+                    selectedTables === "any"
+                        ? table === "any"
+                        : selectedTables.includes(Number(table))
+                );
+
+            });
     }
 
 
@@ -839,6 +989,77 @@
             );
 
     });
+
+
+    /*
+     * ==========================================
+     * TIMES TABLE BUTTONS
+     * ==========================================
+     *
+     * "any" replaces the selection.
+     *
+     * A number toggles that table on/off,
+     * but the last selected table can't be
+     * turned off.
+     */
+
+    function toggleTable(table) {
+
+        if (table === "any") {
+
+            selectedTables = "any";
+
+        } else if (selectedTables === "any") {
+
+            selectedTables = [table];
+
+        } else if (selectedTables.includes(table)) {
+
+            if (selectedTables.length === 1) {
+                return;
+            }
+
+            selectedTables =
+                selectedTables.filter(function(t) {
+                    return t !== table;
+                });
+
+        } else {
+
+            selectedTables =
+                selectedTables
+                    .concat(table)
+                    .sort(function(a, b) {
+                        return a - b;
+                    });
+        }
+
+        saveState();
+
+        updateActiveButtons();
+
+        loadQuestion();
+    }
+
+
+    document
+        .querySelectorAll(".table-selector button")
+        .forEach(function(button) {
+
+            button.addEventListener(
+                "click",
+                function() {
+
+                    const table =
+                        button.dataset.table === "any"
+                            ? "any"
+                            : Number(button.dataset.table);
+
+                    toggleTable(table);
+                }
+            );
+
+        });
 
 
     /*
@@ -927,7 +1148,7 @@
              * remember for this mode.
              */
 
-            delete pending[selectedMode];
+            delete pending[pendingKey()];
 
             saveState();
         }

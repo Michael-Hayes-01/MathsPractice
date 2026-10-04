@@ -458,7 +458,7 @@
          ========================= -->
 
     <div class="table-label">
-        Choose a times table
+        Choose times tables
     </div>
 
     <div class="table-selector">
@@ -553,7 +553,7 @@
                 STORAGE_KEY,
                 JSON.stringify({
                     selectedMode: selectedMode,
-                    selectedTable: selectedTable,
+                    selectedTables: selectedTables,
                     pending: pending
                 })
             );
@@ -566,8 +566,8 @@
 
     /*
      * Unsolved questions, keyed by
-     * "mode:table", e.g. "divide:6"
-     * or "random:any".
+     * "mode:tables", e.g. "divide:6",
+     * "multiply:6,7,8" or "random:any".
      */
 
     let pending =
@@ -577,17 +577,27 @@
         persistedState.selectedMode || "multiply";
 
     /*
-     * A number 2-12, or "any" for a random
-     * table on every new question.
+     * A sorted array of tables 2-12 (one is
+     * picked at random for each new question),
+     * or "any" for any table 2-12.
+     *
+     * Falls back to the older single
+     * selectedTable value if that was saved.
      */
 
-    let selectedTable =
-        persistedState.selectedTable || 3;
+    let selectedTables =
+        persistedState.selectedTables ||
+        (persistedState.selectedTable === "any"
+            ? "any"
+            : [persistedState.selectedTable || 3]);
 
 
     function pendingKey() {
 
-        return selectedMode + ":" + selectedTable;
+        return selectedMode + ":" +
+            (selectedTables === "any"
+                ? "any"
+                : selectedTables.join(","));
     }
 
 
@@ -645,14 +655,17 @@
         /*
          * Determine times table.
          *
-         * "any" picks a table from 2-12
-         * for each new question.
+         * "any" picks a table from 2-12,
+         * otherwise one of the selected
+         * tables, for each new question.
          */
 
         const table =
-            selectedTable === "any"
+            selectedTables === "any"
                 ? Math.floor(Math.random() * 11) + 2
-                : selectedTable;
+                : selectedTables[
+                    Math.floor(Math.random() * selectedTables.length)
+                ];
 
 
         /*
@@ -909,9 +922,14 @@
             .querySelectorAll(".table-selector button")
             .forEach(function(button) {
 
+                const table =
+                    button.dataset.table;
+
                 button.classList.toggle(
                     "active",
-                    button.dataset.table === String(selectedTable)
+                    selectedTables === "any"
+                        ? table === "any"
+                        : selectedTables.includes(Number(table))
                 );
 
             });
@@ -936,9 +954,44 @@
     }
 
 
-    function setTable(table) {
+    /*
+     * "any" replaces the selection.
+     *
+     * A number toggles that table on/off,
+     * but the last selected table can't be
+     * turned off.
+     */
 
-        selectedTable = table;
+    function toggleTable(table) {
+
+        if (table === "any") {
+
+            selectedTables = "any";
+
+        } else if (selectedTables === "any") {
+
+            selectedTables = [table];
+
+        } else if (selectedTables.includes(table)) {
+
+            if (selectedTables.length === 1) {
+                return;
+            }
+
+            selectedTables =
+                selectedTables.filter(function(t) {
+                    return t !== table;
+                });
+
+        } else {
+
+            selectedTables =
+                selectedTables
+                    .concat(table)
+                    .sort(function(a, b) {
+                        return a - b;
+                    });
+        }
 
         saveState();
 
@@ -1123,7 +1176,7 @@
                             ? "any"
                             : Number(button.dataset.table);
 
-                    setTable(table);
+                    toggleTable(table);
                 }
             );
 
