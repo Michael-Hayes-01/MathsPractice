@@ -378,7 +378,8 @@
         .home-button {
             position: fixed;
             top: 15px;
-            left: 15px;
+            left: 50%;
+            transform: translateX(-50%);
             z-index: 5;
             padding: 10px 16px;
             border-radius: 8px;
@@ -706,7 +707,8 @@
 
 
         /*
-         * Randomly choose which number is missing.
+         * Choose which number is missing,
+         * from the answer box position setting.
          *
          * 0 = first number
          * 1 = second number
@@ -714,7 +716,7 @@
          */
 
         const missing =
-            Math.floor(Math.random() * 3);
+            pickInputPosition();
 
 
         let a;
@@ -893,6 +895,19 @@
 
         document.getElementById("equation").innerHTML =
             saved.equationHTML;
+
+
+        /*
+         * The answer box position setting has
+         * changed since this was saved.
+         */
+
+        if (!inputPositionMatches()) {
+
+            generateProblem();
+
+            return;
+        }
 
         message.textContent = "";
         message.className = "";

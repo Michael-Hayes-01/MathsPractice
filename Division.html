@@ -544,17 +544,18 @@
 
 
         /*
-         * Pick one of three question formats.
+         * Pick one of three question formats,
+         * from the answer box position setting.
          *
-         * 0 = product ÷ table = ?
+         * 0 = product ÷ table = ?          (right)
          *
-         * 1 = ? ÷ table = multiplier
+         * 1 = ? ÷ table = multiplier       (left)
          *
-         * 2 = product ÷ ? = table
+         * 2 = product ÷ ? = table          (centre)
          */
 
         const questionType =
-            Math.floor(Math.random() * 3);
+            [1, 2, 0][pickInputPosition()];
 
 
         /*
@@ -735,6 +736,19 @@
         message.className = "";
 
         equation.innerHTML = stored.equationHTML;
+
+
+        /*
+         * The answer box position setting has
+         * changed since this was saved.
+         */
+
+        if (!inputPositionMatches()) {
+
+            generateProblem();
+
+            return;
+        }
 
 
         document

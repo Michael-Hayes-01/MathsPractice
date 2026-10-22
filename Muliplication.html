@@ -539,15 +539,16 @@
 
 
         /*
-         * Pick one of three question formats.
+         * Pick one of three question formats,
+         * from the answer box position setting.
          *
-         * 0 = table × ? = result
-         * 1 = ? × table = result
-         * 2 = table × other = ?
+         * 0 = table × ? = result    (centre)
+         * 1 = ? × table = result    (left)
+         * 2 = table × other = ?     (right)
          */
 
         const questionType =
-            Math.floor(Math.random() * 3);
+            [1, 0, 2][pickInputPosition()];
 
 
         /*
@@ -722,6 +723,19 @@
         message.className = "";
 
         equation.innerHTML = stored.equationHTML;
+
+
+        /*
+         * The answer box position setting has
+         * changed since this was saved.
+         */
+
+        if (!inputPositionMatches()) {
+
+            generateProblem();
+
+            return;
+        }
 
 
         document

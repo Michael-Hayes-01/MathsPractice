@@ -4,7 +4,8 @@
  *
  * Used by MissingNum.html, Muliplication.html,
  * Division.html, MultDivPractice.html and
- * MixedPractice.html.
+ * MixedPractice.html (and index.html for the
+ * answer box position setting).
  * ==========================================
  */
 
@@ -1830,4 +1831,308 @@ function celebrateCorrectAnswer() {
         ];
 
     effect();
+}
+
+
+/*
+ * ==========================================
+ * ANSWER BOX POSITION
+ * ==========================================
+ *
+ * Which number in "a op b = c" the answer
+ * box replaces:
+ *
+ * left   = a
+ * centre = b
+ * right  = c
+ * random = any of them, weighted
+ *          50% right, 25% centre, 25% left
+ *
+ * The setting is either "random" or an
+ * array of one or more positions, e.g.
+ * ["left", "right"] (picked evenly).
+ *
+ * The setting is shared by all pages, but
+ * only kept for this browser tab, so opening
+ * the site (or refreshing the home page)
+ * starts on random.
+ */
+
+const INPUT_POSITIONS = ["left", "centre", "right"];
+
+const INPUT_POSITION_STORAGE_KEY = "inputPosition";
+
+
+function getInputPositionSetting() {
+
+    try {
+
+        const saved =
+            sessionStorage.getItem(INPUT_POSITION_STORAGE_KEY);
+
+        /*
+         * Older saves were a single position.
+         */
+
+        if (INPUT_POSITIONS.includes(saved)) {
+            return [saved];
+        }
+
+        const parsed = JSON.parse(saved);
+
+        if (
+            Array.isArray(parsed) &&
+            parsed.length > 0 &&
+            parsed.every(function (position) {
+                return INPUT_POSITIONS.includes(position);
+            })
+        ) {
+            return parsed;
+        }
+
+    } catch (e) {}
+
+    return "random";
+}
+
+
+function saveInputPositionSetting(setting) {
+
+    try {
+
+        sessionStorage.setItem(
+            INPUT_POSITION_STORAGE_KEY,
+            JSON.stringify(setting)
+        );
+
+    } catch (e) {}
+}
+
+
+/*
+ * Returns the position for a new question:
+ * 0 = left, 1 = centre, 2 = right.
+ */
+
+function pickInputPosition() {
+
+    const setting = getInputPositionSetting();
+
+    if (setting !== "random") {
+
+        const position =
+            setting[Math.floor(Math.random() * setting.length)];
+
+        return INPUT_POSITIONS.indexOf(position);
+    }
+
+    const roll = Math.random();
+
+    if (roll < 0.5) {
+        return 2;
+    }
+
+    if (roll < 0.75) {
+        return 1;
+    }
+
+    return 0;
+}
+
+
+/*
+ * Whether the question currently shown has
+ * its answer box where the setting wants it.
+ *
+ * The equation is always 5 elements
+ * (a, op, b, =, c) so the answer box is
+ * at index 0, 2 or 4.
+ */
+
+function inputPositionMatches() {
+
+    const setting = getInputPositionSetting();
+
+    if (setting === "random") {
+        return true;
+    }
+
+    const index =
+        Array.prototype.indexOf.call(
+            document.getElementById("equation").children,
+            document.getElementById("answer")
+        );
+
+    return setting.includes(INPUT_POSITIONS[index / 2]);
+}
+
+
+/*
+ * Adds the Left / Centre / Right / Random
+ * buttons before the given element.
+ * Used on the home page (index.html).
+ *
+ * "random" replaces the selection.
+ *
+ * A position toggles on/off, but the last
+ * selected position can't be turned off.
+ *
+ * The practice pages read the saved setting,
+ * and replace any saved question that no
+ * longer fits it.
+ */
+
+function setupInputPositionSelector(beforeElement) {
+
+    /*
+     * Refreshing the home page goes back
+     * to the default (random).
+     */
+
+    const navigation =
+        performance.getEntriesByType("navigation")[0];
+
+    if (navigation && navigation.type === "reload") {
+        saveInputPositionSetting("random");
+    }
+
+
+    const style = document.createElement("style");
+
+    style.textContent = `
+        .position-section {
+            margin-top: 30px;
+        }
+
+        .position-label {
+            font-size: 14px;
+            font-weight: bold;
+            color: #555;
+            margin-bottom: 6px;
+        }
+
+        .position-selector {
+            display: flex;
+            justify-content: center;
+            flex-wrap: wrap;
+            gap: 4px;
+        }
+
+        .position-selector button {
+            padding: 3px 9px;
+            border: 2px solid #333;
+            border-radius: 5px;
+            font-size: 13px;
+            font-weight: bold;
+            cursor: pointer;
+            background: #eee;
+            color: #333;
+        }
+
+        .position-selector button:hover {
+            background: #ddd;
+        }
+
+        .position-selector button.active {
+            background: #333;
+            color: white;
+        }
+    `;
+
+    document.head.appendChild(style);
+
+
+    const section = document.createElement("div");
+
+    section.innerHTML = `
+        <div class="position-label">
+            Answer box position
+        </div>
+
+        <div class="position-selector">
+            <button data-position="left">Left</button>
+            <button data-position="centre">Centre</button>
+            <button data-position="right">Right</button>
+            <button data-position="random">Random</button>
+        </div>
+    `;
+
+    section.className = "position-section";
+
+    beforeElement.parentNode.insertBefore(section, beforeElement);
+
+
+    const buttons =
+        section.querySelectorAll(".position-selector button");
+
+    function updateActive() {
+
+        const setting = getInputPositionSetting();
+
+        buttons.forEach(function (button) {
+
+            const position = button.dataset.position;
+
+            button.classList.toggle(
+                "active",
+                setting === "random"
+                    ? position === "random"
+                    : setting.includes(position)
+            );
+
+        });
+    }
+
+    function togglePosition(position) {
+
+        let setting = getInputPositionSetting();
+
+        if (position === "random") {
+
+            setting = "random";
+
+        } else if (setting === "random") {
+
+            setting = [position];
+
+        } else if (setting.includes(position)) {
+
+            if (setting.length === 1) {
+                return;
+            }
+
+            setting =
+                setting.filter(function (p) {
+                    return p !== position;
+                });
+
+        } else {
+
+            /*
+             * Keep them in left, centre,
+             * right order.
+             */
+
+            setting =
+                INPUT_POSITIONS.filter(function (p) {
+                    return p === position || setting.includes(p);
+                });
+        }
+
+        saveInputPositionSetting(setting);
+    }
+
+    buttons.forEach(function (button) {
+
+        button.addEventListener("click", function () {
+
+            togglePosition(button.dataset.position);
+
+            updateActive();
+
+        });
+
+    });
+
+    updateActive();
 }

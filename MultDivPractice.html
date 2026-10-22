@@ -369,7 +369,8 @@
         .home-button {
             position: fixed;
             top: 15px;
-            left: 15px;
+            left: 50%;
+            transform: translateX(-50%);
             z-index: 5;
             padding: 10px 16px;
             border-radius: 8px;
@@ -700,11 +701,18 @@
 
 
         /*
-         * Pick one of three question formats.
+         * Pick one of three question formats,
+         * from the answer box position setting
+         * (0 = left, 1 = centre, 2 = right).
          */
 
+        const position =
+            pickInputPosition();
+
         const questionType =
-            Math.floor(Math.random() * 3);
+            operation === "multiply"
+                ? [1, 0, 2][position]
+                : [1, 2, 0][position];
 
         const input =
             answerInputHTML();
@@ -873,6 +881,19 @@
 
         equation.innerHTML =
             saved.equationHTML;
+
+
+        /*
+         * The answer box position setting has
+         * changed since this was saved.
+         */
+
+        if (!inputPositionMatches()) {
+
+            generateProblem();
+
+            return;
+        }
 
         message.textContent = "";
         message.className = "";
