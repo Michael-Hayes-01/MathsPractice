@@ -1846,7 +1846,7 @@ function celebrateCorrectAnswer() {
  * centre = b
  * right  = c
  * random = any of them, weighted
- *          50% right, 25% centre, 25% left
+ *          60% right, 20% centre, 20% left
  *
  * The setting is either "random" or an
  * array of one or more positions, e.g.
@@ -1928,11 +1928,11 @@ function pickInputPosition() {
 
     const roll = Math.random();
 
-    if (roll < 0.5) {
+    if (roll < 0.6) {
         return 2;
     }
 
-    if (roll < 0.75) {
+    if (roll < 0.8) {
         return 1;
     }
 
