@@ -345,6 +345,17 @@
             background: #555;
         }
 
+        .home-button {
+            display: inline-flex;
+            align-items: center;
+            gap: 6px;
+        }
+
+        .nav-icon {
+            font-size: 26px;
+            line-height: 1;
+        }
+
         @media (max-width: 600px) {
 
             .container {
@@ -383,8 +394,8 @@
             class="home-button"
             href="maths.html"
             onclick="if (document.referrer.startsWith(location.origin)) { history.back(); return false; }"
-    >⬅ Back</a>
-    <a class="home-button" href="index.html">🏠 Home</a>
+    ><span class="nav-icon">⬅️</span> Back</a>
+    <a class="home-button" href="index.html"><span class="nav-icon">🏠</span> Home</a>
 </div>
 
 <!-- Fireworks are created here -->

@@ -174,6 +174,114 @@
             color: white;
         }
 
+        /* =========================
+           PASTE A NEW WORD SET
+           ========================= */
+
+        .small-button {
+            padding: 4px 10px;
+            border: 2px solid #333;
+            border-radius: 5px;
+            font-size: 13px;
+            font-weight: bold;
+            cursor: pointer;
+            background: #eee;
+            color: #333;
+        }
+
+        .small-button:hover {
+            background: #ddd;
+        }
+
+        .add-set {
+            margin-bottom: 10px;
+        }
+
+        /*
+         * The page doesn't scroll, so hide the
+         * game while the paste panel is open.
+         */
+
+        .container.adding-set .word-area,
+        .container.adding-set .actions,
+        .container.adding-set #message,
+        .container.adding-set #progress {
+            display: none;
+        }
+
+        .add-set-panel {
+            text-align: left;
+            background: #f4f6f8;
+            border-radius: 8px;
+            padding: 15px;
+            margin-bottom: 15px;
+        }
+
+        .add-set-panel label {
+            display: block;
+            font-size: 14px;
+            font-weight: bold;
+            color: #555;
+            margin: 8px 0 4px;
+        }
+
+        .add-set-panel input,
+        .add-set-panel textarea {
+            width: 100%;
+            font-size: 16px;
+            font-family: Arial, sans-serif;
+            padding: 8px;
+            border: 2px solid #888;
+            border-radius: 6px;
+        }
+
+        .add-set-panel textarea {
+            resize: vertical;
+        }
+
+        .add-set-panel input:focus,
+        .add-set-panel textarea:focus {
+            outline: none;
+            border-color: #333;
+        }
+
+        .add-set-actions {
+            margin-top: 10px;
+            display: flex;
+            gap: 8px;
+        }
+
+        #saveSetBtn {
+            background: #2e9e44;
+            border-color: #2e9e44;
+            color: white;
+        }
+
+        #saveSetBtn:hover {
+            background: #237a34;
+        }
+
+        #addSetError {
+            margin-top: 8px;
+            font-size: 14px;
+            font-weight: bold;
+            min-height: 17px;
+        }
+
+        .custom-set-list {
+            margin-top: 10px;
+            font-size: 14px;
+            color: #555;
+        }
+
+        .custom-set-list div {
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+            gap: 8px;
+            margin-top: 6px;
+        }
+
         #progress {
             color: #888;
             font-size: 15px;
@@ -345,6 +453,17 @@
             background: #555;
         }
 
+        .home-button {
+            display: inline-flex;
+            align-items: center;
+            gap: 6px;
+        }
+
+        .nav-icon {
+            font-size: 26px;
+            line-height: 1;
+        }
+
         /* =========================
            MOBILE
            ========================= */
@@ -386,8 +505,8 @@
             class="home-button"
             href="index.html"
             onclick="if (document.referrer.startsWith(location.origin)) { history.back(); return false; }"
-    >⬅ Back</a>
-    <a class="home-button" href="index.html">🏠 Home</a>
+    ><span class="nav-icon">⬅️</span> Back</a>
+    <a class="home-button" href="index.html"><span class="nav-icon">🏠</span> Home</a>
 </div>
 
 <!-- Fireworks are created here -->
@@ -403,10 +522,56 @@
 
     <!-- =========================
          WORD SETS (one button per
-         set in words/words.js)
+         set in words/words.js, plus
+         any pasted in)
          ========================= -->
 
     <div class="set-selector" id="setSelector"></div>
+
+    <div class="add-set">
+        <button id="addSetBtn" class="small-button">
+            ➕ Paste a new word set
+        </button>
+    </div>
+
+    <div id="addSetPanel" class="add-set-panel hidden">
+
+        <label for="newSetName">Name</label>
+
+        <input
+                type="text"
+                id="newSetName"
+                maxlength="30"
+                placeholder="e.g. Week 5"
+                autocomplete="off"
+        >
+
+        <label for="newSetWords">Words</label>
+
+        <textarea
+                id="newSetWords"
+                rows="8"
+                spellcheck="false"
+                placeholder="One word per line, with an optional definition:&#10;because – Explains why something happens.&#10;friend&#10;&#10;or separated by commas: because, friend, people"
+        ></textarea>
+
+        <div class="add-set-actions">
+
+            <button id="saveSetBtn" class="small-button">
+                Save word set
+            </button>
+
+            <button id="cancelSetBtn" class="small-button">
+                Cancel
+            </button>
+
+        </div>
+
+        <div id="addSetError" class="incorrect"></div>
+
+        <div id="customSetList" class="custom-set-list"></div>
+
+    </div>
 
     <div id="progress"></div>
 
@@ -524,7 +689,12 @@
      * ==========================================
      *
      * Remembers which word sets are selected
-     * (by name).
+     * (by name), and for each selection the
+     * shuffled word order and which word is
+     * being practised - so refreshing the page
+     * (or switching sets and back) shows the
+     * same word until it is spelled correctly,
+     * instead of skipping it.
      */
 
     const STORAGE_KEY = "spellingPracticeState";
@@ -553,7 +723,8 @@
             localStorage.setItem(
                 STORAGE_KEY,
                 JSON.stringify({
-                    selectedSets: selectedSets
+                    selectedSets: selectedSets,
+                    rounds: rounds
                 })
             );
 
@@ -561,12 +732,23 @@
     }
 
 
+    const persistedState = loadState();
+
     /*
      * Either "all" or a list of set names.
      */
 
     let selectedSets =
-        loadState().selectedSets || "all";
+        persistedState.selectedSets || "all";
+
+    /*
+     * Saved rounds by selection:
+     *
+     *     { "all": { words: ["happy", ...], index: 3 } }
+     */
+
+    let rounds =
+        persistedState.rounds || {};
 
 
     /*
@@ -581,15 +763,36 @@
      *
      * Blank lines and lines starting with #
      * are ignored.
+     *
+     * To make pasted lists work too: numbering
+     * or bullets ("1.", "2)", "-", "•") are
+     * removed, and a line without a definition
+     * can hold several words separated by
+     * commas, semicolons or tabs.
      */
 
     function parseWordList(text) {
 
         const words = [];
 
+        function addWord(word, definition) {
+
+            word = word.trim().replace(/[.,;:!?]+$/, "");
+
+            if (word !== "") {
+
+                words.push({
+                    word: word,
+                    definition: definition
+                });
+            }
+        }
+
         text.split(/\r?\n/).forEach(function (line) {
 
-            line = line.trim();
+            line = line
+                .trim()
+                .replace(/^(\d+[.)]|[-–•*])\s+/, "");
 
             if (line === "" || line.startsWith("#")) {
                 return;
@@ -597,20 +800,298 @@
 
             const parts = line.split(/\s+[–—-]\s+/);
 
-            const word = parts[0].trim();
+            if (parts.length > 1) {
 
-            if (word === "") {
-                return;
+                addWord(
+                    parts[0],
+                    parts.slice(1).join(" – ").trim()
+                );
+
+            } else {
+
+                line.split(/[,;\t]+/).forEach(function (word) {
+                    addWord(word, "");
+                });
             }
-
-            words.push({
-                word: word,
-                definition: parts.slice(1).join(" – ").trim()
-            });
 
         });
 
         return words;
+    }
+
+
+    /*
+     * ==========================================
+     * PASTED WORD SETS
+     * ==========================================
+     *
+     * A page opened from a file can't change
+     * words.js, so pasted sets are kept in this
+     * browser. Each is { name, text }, with the
+     * text as pasted.
+     */
+
+    const CUSTOM_SETS_KEY = "spellingCustomSets";
+
+
+    function loadCustomSets() {
+
+        try {
+
+            const parsed = JSON.parse(
+                localStorage.getItem(CUSTOM_SETS_KEY)
+            );
+
+            return Array.isArray(parsed) ? parsed : [];
+
+        } catch (e) {
+
+            return [];
+        }
+    }
+
+
+    function saveCustomSets() {
+
+        try {
+
+            localStorage.setItem(
+                CUSTOM_SETS_KEY,
+                JSON.stringify(customSets)
+            );
+
+        } catch (e) {}
+    }
+
+
+    let customSets = loadCustomSets();
+
+
+    /*
+     * The sets from words.js, then the pasted
+     * ones (skipping any whose name words.js
+     * now uses).
+     */
+
+    function buildWordSets() {
+
+        const fileSets =
+            WORD_SET_TEXTS.map(function (set) {
+                return {
+                    name: set.name,
+                    words: parseWordList(set.text)
+                };
+            });
+
+        const pastedSets = customSets
+            .filter(function (set) {
+                return !fileSets.some(function (fileSet) {
+                    return fileSet.name === set.name;
+                });
+            })
+            .map(function (set) {
+                return {
+                    name: set.name,
+                    words: parseWordList(set.text)
+                };
+            });
+
+        wordSets = fileSets
+            .concat(pastedSets)
+            .filter(function (set) {
+                return set.words.length > 0;
+            });
+    }
+
+
+    function showAddSetError(text) {
+
+        document.getElementById("addSetError").textContent = text;
+    }
+
+
+    function openAddSetPanel() {
+
+        document.getElementById("addSetPanel").classList.remove("hidden");
+
+        document.getElementById("addSetBtn").classList.add("hidden");
+
+        document.querySelector(".container").classList.add("adding-set");
+
+        showAddSetError("");
+
+        renderCustomSetList();
+
+        document.getElementById("newSetName").focus();
+    }
+
+
+    function closeAddSetPanel() {
+
+        document.getElementById("addSetPanel").classList.add("hidden");
+
+        document.getElementById("addSetBtn").classList.remove("hidden");
+
+        document.querySelector(".container").classList.remove("adding-set");
+
+        document.getElementById("newSetName").value = "";
+
+        document.getElementById("newSetWords").value = "";
+    }
+
+
+    function saveNewSet() {
+
+        const name =
+            document.getElementById("newSetName").value.trim();
+
+        const text =
+            document.getElementById("newSetWords").value;
+
+
+        if (name === "") {
+
+            showAddSetError("Please give the word set a name.");
+
+            return;
+        }
+
+        const nameTaken =
+            name.toLowerCase() === "all" ||
+            wordSets.some(function (set) {
+                return set.name.toLowerCase() === name.toLowerCase();
+            });
+
+        if (nameTaken) {
+
+            showAddSetError(`There is already a word set called "${name}".`);
+
+            return;
+        }
+
+        if (parseWordList(text).length === 0) {
+
+            showAddSetError("Please paste in some words.");
+
+            return;
+        }
+
+
+        customSets.push({
+            name: name,
+            text: text
+        });
+
+        saveCustomSets();
+
+        buildWordSets();
+
+
+        /*
+         * Start practising the new set.
+         */
+
+        selectedSets = [name];
+
+        closeAddSetPanel();
+
+        renderSetSelector();
+
+        startRound(false);
+    }
+
+
+    function deleteCustomSet(name) {
+
+        if (!confirm(`Delete the word set "${name}"?`)) {
+            return;
+        }
+
+        customSets =
+            customSets.filter(function (set) {
+                return set.name !== name;
+            });
+
+        saveCustomSets();
+
+        buildWordSets();
+
+
+        if (Array.isArray(selectedSets)) {
+
+            selectedSets =
+                selectedSets.filter(function (n) {
+                    return n !== name;
+                });
+
+            if (selectedSets.length === 0) {
+                selectedSets = "all";
+            }
+        }
+
+        renderSetSelector();
+
+        renderCustomSetList();
+
+        startRound(false);
+    }
+
+
+    /*
+     * The pasted sets, each with a Delete
+     * button, shown in the paste panel.
+     */
+
+    function renderCustomSetList() {
+
+        const list =
+            document.getElementById("customSetList");
+
+        list.innerHTML = "";
+
+        if (customSets.length === 0) {
+            return;
+        }
+
+        const heading =
+            document.createElement("strong");
+
+        heading.textContent = "Pasted word sets";
+
+        list.appendChild(heading);
+
+
+        customSets.forEach(function (set) {
+
+            const row =
+                document.createElement("div");
+
+            const label =
+                document.createElement("span");
+
+            label.textContent =
+                `${set.name} (${parseWordList(set.text).length} words)`;
+
+            const button =
+                document.createElement("button");
+
+            button.className = "small-button";
+
+            button.textContent = "✕ Delete";
+
+            button.addEventListener("click", function () {
+
+                deleteCustomSet(set.name);
+
+            });
+
+            row.appendChild(label);
+
+            row.appendChild(button);
+
+            list.appendChild(row);
+
+        });
     }
 
 
@@ -731,7 +1212,7 @@
 
         updateSetButtons();
 
-        startNewRound();
+        startRound(false);
     }
 
 
@@ -744,6 +1225,10 @@
      * each (sets can share words), shuffled.
      * When all have been spelled, reshuffle
      * and go round again.
+     *
+     * Each selection of sets has its own saved
+     * round, so it carries on from the word it
+     * was on.
      */
 
     function shuffle(items) {
@@ -759,11 +1244,19 @@
     }
 
 
-    function startNewRound() {
+    function selectionKey() {
+
+        return selectedSets === "all"
+            ? "all"
+            : selectedSets.join("|");
+    }
+
+
+    function selectedWords() {
 
         const seen = new Set();
 
-        queue = [];
+        const words = [];
 
         wordSets.forEach(function (set) {
 
@@ -782,16 +1275,94 @@
 
                     seen.add(key);
 
-                    queue.push(entry);
+                    words.push(entry);
                 }
 
             });
 
         });
 
-        shuffle(queue);
+        return words;
+    }
 
-        queueIndex = 0;
+
+    function saveRound() {
+
+        rounds[selectionKey()] = {
+            words: queue.map(function (entry) {
+                return entry.word;
+            }),
+            index: queueIndex
+        };
+
+        saveState();
+    }
+
+
+    /*
+     * Carries on this selection's saved round,
+     * or shuffles a new one (always, when
+     * newRound is true).
+     *
+     * A saved round is only used if it still
+     * has exactly the selected words - after
+     * words.js is edited it starts afresh.
+     */
+
+    function startRound(newRound) {
+
+        const words = selectedWords();
+
+
+        /*
+         * No word sets at all (empty words.js
+         * and nothing pasted).
+         */
+
+        if (words.length === 0) {
+
+            showNoWords();
+
+            return;
+        }
+
+        const saved = rounds[selectionKey()];
+
+        const byWord = new Map(
+            words.map(function (entry) {
+                return [entry.word, entry];
+            })
+        );
+
+        const savedFits =
+            !newRound &&
+            saved &&
+            Array.isArray(saved.words) &&
+            saved.words.length === words.length &&
+            new Set(saved.words).size === words.length &&
+            saved.words.every(function (word) {
+                return byWord.has(word);
+            }) &&
+            saved.index >= 0 &&
+            saved.index < words.length;
+
+        if (savedFits) {
+
+            queue =
+                saved.words.map(function (word) {
+                    return byWord.get(word);
+                });
+
+            queueIndex = saved.index;
+
+        } else {
+
+            queue = shuffle(words);
+
+            queueIndex = 0;
+        }
+
+        saveRound();
 
         showWord();
     }
@@ -811,10 +1382,12 @@
 
         if (queueIndex >= queue.length) {
 
-            startNewRound();
+            startRound(true);
 
             return;
         }
+
+        saveRound();
 
         showWord();
     }
@@ -825,6 +1398,32 @@
      * SHOW A NEW WORD
      * ==========================================
      */
+
+    function showNoWords() {
+
+        clearTimeout(nextWordTimer);
+
+        stage = null;
+
+        ["word", "answer", "saidItBtn", "submitBtn", "nextBtn"]
+            .forEach(function (id) {
+                document.getElementById(id).classList.add("hidden");
+            });
+
+        document.getElementById("definition").textContent = "";
+
+        document.getElementById("progress").textContent = "";
+
+        const message =
+            document.getElementById("message");
+
+        message.textContent =
+            "No words yet - paste a word set to get started.";
+
+        message.className =
+            "incorrect";
+    }
+
 
     function showWord() {
 
@@ -994,6 +1593,24 @@
 
             document.getElementById("nextBtn").classList.remove("hidden");
 
+
+            /*
+             * Solved - a refresh now goes on to
+             * the next word.
+             */
+
+            if (queueIndex + 1 < queue.length) {
+
+                rounds[selectionKey()].index = queueIndex + 1;
+
+            } else {
+
+                delete rounds[selectionKey()];
+            }
+
+            saveState();
+
+
             nextWordTimer =
                 setTimeout(nextWord, NEXT_WORD_DELAY);
         }
@@ -1069,6 +1686,42 @@
         );
 
 
+    document
+        .getElementById("addSetBtn")
+        .addEventListener(
+            "click",
+            function () {
+
+                openAddSetPanel();
+
+            }
+        );
+
+
+    document
+        .getElementById("saveSetBtn")
+        .addEventListener(
+            "click",
+            function () {
+
+                saveNewSet();
+
+            }
+        );
+
+
+    document
+        .getElementById("cancelSetBtn")
+        .addEventListener(
+            "click",
+            function () {
+
+                closeAddSetPanel();
+
+            }
+        );
+
+
     /*
      * ==========================================
      * ENTER KEY
@@ -1084,6 +1737,15 @@
         function (event) {
 
             if (event.key !== "Enter" || stage === null) {
+                return;
+            }
+
+            /*
+             * Typing in the paste panel - Enter
+             * there is a new line, not the game.
+             */
+
+            if (event.target.closest("#addSetPanel")) {
                 return;
             }
 
@@ -1120,31 +1782,7 @@
 
     (function startGame() {
 
-        wordSets = WORD_SET_TEXTS
-            .map(function (set) {
-                return {
-                    name: set.name,
-                    words: parseWordList(set.text)
-                };
-            })
-            .filter(function (set) {
-                return set.words.length > 0;
-            });
-
-
-        if (wordSets.length === 0) {
-
-            const message =
-                document.getElementById("message");
-
-            message.textContent =
-                "Couldn't find any words in words/words.js.";
-
-            message.className =
-                "incorrect";
-
-            return;
-        }
+        buildWordSets();
 
 
         /*
@@ -1175,7 +1813,7 @@
 
         renderSetSelector();
 
-        startNewRound();
+        startRound(false);
 
     })();
 
