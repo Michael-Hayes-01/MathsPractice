@@ -524,7 +524,11 @@
      * ==========================================
      *
      * Remembers which word sets are selected
-     * (by name).
+     * (by name), and the round in progress for
+     * each selection, so refreshing the page
+     * (or switching sets and back) brings back
+     * the same word instead of letting the
+     * user skip it.
      */
 
     const STORAGE_KEY = "spellingPracticeState";
@@ -553,7 +557,8 @@
             localStorage.setItem(
                 STORAGE_KEY,
                 JSON.stringify({
-                    selectedSets: selectedSets
+                    selectedSets: selectedSets,
+                    rounds: rounds
                 })
             );
 
@@ -561,12 +566,31 @@
     }
 
 
+    const persistedState = loadState();
+
     /*
      * Either "all" or a list of set names.
      */
 
     let selectedSets =
-        loadState().selectedSets || "all";
+        persistedState.selectedSets || "all";
+
+    /*
+     * Rounds in progress, keyed by the
+     * selection (see roundKey), e.g.
+     * { words: ["because", ...], index: 3 }.
+     */
+
+    let rounds =
+        persistedState.rounds || {};
+
+
+    function roundKey() {
+
+        return selectedSets === "all"
+            ? "all"
+            : selectedSets.join("|");
+    }
 
 
     /*
@@ -731,7 +755,7 @@
 
         updateSetButtons();
 
-        startNewRound();
+        loadRound();
     }
 
 
@@ -759,11 +783,11 @@
     }
 
 
-    function startNewRound() {
+    function selectedWords() {
 
         const seen = new Set();
 
-        queue = [];
+        const words = [];
 
         wordSets.forEach(function (set) {
 
@@ -782,16 +806,86 @@
 
                     seen.add(key);
 
-                    queue.push(entry);
+                    words.push(entry);
                 }
 
             });
 
         });
 
-        shuffle(queue);
+        return words;
+    }
+
+
+    function startNewRound() {
+
+        queue = shuffle(selectedWords());
 
         queueIndex = 0;
+
+        saveRound();
+
+        showWord();
+    }
+
+
+    function saveRound() {
+
+        rounds[roundKey()] = {
+            words: queue.map(function (entry) {
+                return entry.word;
+            }),
+            index: queueIndex
+        };
+
+        saveState();
+    }
+
+
+    /*
+     * ==========================================
+     * LOAD ROUND
+     *
+     * Restores the round left behind for the
+     * selected sets, or starts a new one if
+     * there isn't one (or words.js has changed
+     * since).
+     * ==========================================
+     */
+
+    function loadRound() {
+
+        const saved =
+            rounds[roundKey()];
+
+        const words = selectedWords();
+
+        const byWord = new Map(
+            words.map(function (entry) {
+                return [entry.word, entry];
+            })
+        );
+
+        if (
+            !saved ||
+            !Array.isArray(saved.words) ||
+            saved.words.length !== words.length ||
+            !saved.words.every(function (word) {
+                return byWord.has(word);
+            }) ||
+            !(saved.index >= 0 && saved.index < words.length)
+        ) {
+
+            startNewRound();
+
+            return;
+        }
+
+        queue = saved.words.map(function (word) {
+            return byWord.get(word);
+        });
+
+        queueIndex = saved.index;
 
         showWord();
     }
@@ -815,6 +909,8 @@
 
             return;
         }
+
+        saveRound();
 
         showWord();
     }
@@ -1175,7 +1271,7 @@
 
         renderSetSelector();
 
-        startNewRound();
+        loadRound();
 
     })();
 
