@@ -377,7 +377,10 @@
         }
 
         .home-button {
-            padding: 10px 16px;
+            display: flex;
+            align-items: center;
+            gap: 8px;
+            padding: 6px 16px;
             border-radius: 8px;
             background: #333;
             color: white;
@@ -388,6 +391,17 @@
 
         .home-button:hover {
             background: #555;
+        }
+
+        .button-icon {
+            font-size: 28px;
+            line-height: 1;
+        }
+
+        .button-icon svg {
+            display: block;
+            width: 28px;
+            height: 28px;
         }
 
         @media (max-width: 600px) {
@@ -434,8 +448,8 @@
             class="home-button"
             href="maths.html"
             onclick="if (document.referrer.startsWith(location.origin)) { history.back(); return false; }"
-    >⬅ Back</a>
-    <a class="home-button" href="index.html">🏠 Home</a>
+    ><span class="button-icon" aria-hidden="true"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="3" stroke-linecap="round" stroke-linejoin="round"><path d="M19 12H5M12 19l-7-7 7-7"/></svg></span> Back</a>
+    <a class="home-button" href="index.html"><span class="button-icon" aria-hidden="true">🏠</span> Home</a>
 </div>
 
 <div id="fireworks"></div>
