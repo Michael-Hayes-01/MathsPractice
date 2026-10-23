@@ -174,6 +174,105 @@
             color: white;
         }
 
+        .set-selector button.add-set {
+            border-style: dashed;
+            background: white;
+        }
+
+        .set-selector .delete-set {
+            margin-left: 6px;
+            padding: 0 4px;
+            border-radius: 4px;
+            font-size: 14px;
+            opacity: 0.6;
+        }
+
+        .set-selector .delete-set:hover {
+            opacity: 1;
+            background: #ff3b30;
+            color: white;
+        }
+
+        /* =========================
+           ADD WORD SET DIALOG
+           ========================= */
+
+        #addSetDialog {
+            width: 90%;
+            max-width: 560px;
+            padding: 25px;
+            border: none;
+            border-radius: 12px;
+            box-shadow: 0 4px 15px rgba(0, 0, 0, 0.25);
+            text-align: left;
+        }
+
+        #addSetDialog::backdrop {
+            background: rgba(0, 0, 0, 0.4);
+        }
+
+        #addSetDialog h2 {
+            margin-top: 0;
+            color: #333;
+        }
+
+        #addSetDialog label {
+            display: block;
+            font-weight: bold;
+            color: #333;
+            margin: 12px 0 6px;
+        }
+
+        #addSetDialog input,
+        #addSetDialog textarea {
+            width: 100%;
+            font-size: 16px;
+            font-family: inherit;
+            padding: 8px;
+            border: 2px solid #888;
+            border-radius: 6px;
+        }
+
+        #addSetDialog textarea {
+            height: 260px;
+            resize: vertical;
+        }
+
+        #addSetDialog .hint {
+            color: #666;
+            font-size: 14px;
+            margin-top: 6px;
+        }
+
+        #addSetError {
+            color: red;
+            font-weight: bold;
+            min-height: 20px;
+            margin-top: 10px;
+        }
+
+        #addSetDialog .dialog-buttons {
+            display: flex;
+            justify-content: flex-end;
+            gap: 10px;
+            margin-top: 10px;
+        }
+
+        #addSetDialog .dialog-buttons button {
+            padding: 10px 22px;
+            font-size: 16px;
+            border: none;
+            border-radius: 6px;
+            cursor: pointer;
+            background: #eee;
+            color: #333;
+        }
+
+        #addSetDialog .dialog-buttons button.save {
+            background: #2e9e44;
+            color: white;
+        }
+
         #progress {
             color: #888;
             font-size: 15px;
@@ -458,6 +557,41 @@
 
 </div>
 
+<!-- =========================
+     ADD WORD SET (opened by
+     the "+ Add" set button)
+     ========================= -->
+
+<dialog id="addSetDialog">
+
+    <h2>Add a word set</h2>
+
+    <label for="addSetName">Name</label>
+
+    <input type="text" id="addSetName" placeholder="e.g. Week 5" autocomplete="off">
+
+    <label for="addSetText">Words</label>
+
+    <textarea
+            id="addSetText"
+            spellcheck="false"
+            placeholder="because – Explains why something happens.&#10;friend – Someone you like.&#10;school"
+    ></textarea>
+
+    <div class="hint">
+        One word per line. A definition after a dash is
+        optional. Saved in this browser only.
+    </div>
+
+    <div id="addSetError"></div>
+
+    <div class="dialog-buttons">
+        <button id="addSetCancel">Cancel</button>
+        <button id="addSetSave" class="save">Save</button>
+    </div>
+
+</dialog>
+
 
 <script src="util.js"></script>
 
@@ -570,6 +704,44 @@
 
 
     /*
+     * Word sets pasted in with "+ Add" are kept
+     * here (not in words.js), as a list of
+     * { name, text }.
+     */
+
+    const CUSTOM_SETS_KEY = "spellingPracticeCustomSets";
+
+
+    function loadCustomSets() {
+
+        try {
+
+            const raw =
+                localStorage.getItem(CUSTOM_SETS_KEY);
+
+            return raw ? JSON.parse(raw) : [];
+
+        } catch (e) {
+
+            return [];
+        }
+    }
+
+
+    function saveCustomSets(sets) {
+
+        try {
+
+            localStorage.setItem(
+                CUSTOM_SETS_KEY,
+                JSON.stringify(sets)
+            );
+
+        } catch (e) {}
+    }
+
+
+    /*
      * ==========================================
      * READ A WORD LIST
      * ==========================================
@@ -625,6 +797,8 @@
      *
      * A set toggles on/off, but the last
      * selected set can't be turned off.
+     *
+     * Pasted-in sets have a ✕ to delete them.
      */
 
     function renderSetSelector() {
@@ -635,7 +809,7 @@
         selector.innerHTML = "";
 
 
-        function addButton(label, name) {
+        function addButton(label, name, custom) {
 
             const button =
                 document.createElement("button");
@@ -652,6 +826,29 @@
 
             });
 
+
+            if (custom) {
+
+                const remove =
+                    document.createElement("span");
+
+                remove.className = "delete-set";
+
+                remove.textContent = "✕";
+
+                remove.title = `Delete ${name}`;
+
+                remove.addEventListener("click", function (event) {
+
+                    event.stopPropagation();
+
+                    deleteCustomSet(name);
+
+                });
+
+                button.appendChild(remove);
+            }
+
             selector.appendChild(button);
         }
 
@@ -660,12 +857,31 @@
 
             addButton(
                 `${set.name} (${set.words.length})`,
-                set.name
+                set.name,
+                set.custom
             );
 
         });
 
         addButton("All", "all");
+
+
+        const add =
+            document.createElement("button");
+
+        add.textContent = "＋ Add";
+
+        add.className = "add-set";
+
+        add.addEventListener("click", function () {
+
+            add.blur();
+
+            openAddSetDialog();
+
+        });
+
+        selector.appendChild(add);
 
         updateSetButtons();
     }
@@ -733,6 +949,158 @@
 
         startNewRound();
     }
+
+
+    /*
+     * ==========================================
+     * ADD / DELETE PASTED WORD SETS
+     * ==========================================
+     *
+     * A new set is selected on its own straight
+     * away, ready to practise. Saving with the
+     * name of an existing pasted set replaces it.
+     */
+
+    const addSetDialog =
+        document.getElementById("addSetDialog");
+
+
+    function openAddSetDialog() {
+
+        clearTimeout(nextWordTimer);
+
+        document.getElementById("addSetName").value = "";
+
+        document.getElementById("addSetText").value = "";
+
+        document.getElementById("addSetError").textContent = "";
+
+        addSetDialog.showModal();
+
+        document.getElementById("addSetName").focus();
+    }
+
+
+    function saveAddSetDialog() {
+
+        const name =
+            document.getElementById("addSetName").value.trim();
+
+        const text =
+            document.getElementById("addSetText").value;
+
+        const error =
+            document.getElementById("addSetError");
+
+
+        if (name === "" || name === "all") {
+
+            error.textContent = "Please give the set a name.";
+
+            return;
+        }
+
+        if (
+            WORD_SET_TEXTS.some(function (set) {
+                return set.name === name;
+            })
+        ) {
+
+            error.textContent = `"${name}" is already a word set - pick another name.`;
+
+            return;
+        }
+
+        if (parseWordList(text).length === 0) {
+
+            error.textContent = "Please paste in some words.";
+
+            return;
+        }
+
+
+        const customSets =
+            loadCustomSets().filter(function (set) {
+                return set.name !== name;
+            });
+
+        customSets.push({
+            name: name,
+            text: text
+        });
+
+        saveCustomSets(customSets);
+
+        addSetDialog.close();
+
+
+        loadWordSets();
+
+        selectedSets = [name];
+
+        saveState();
+
+        renderSetSelector();
+
+        startNewRound();
+    }
+
+
+    function deleteCustomSet(name) {
+
+        if (!confirm(`Delete the word set "${name}"?`)) {
+            return;
+        }
+
+        saveCustomSets(
+            loadCustomSets().filter(function (set) {
+                return set.name !== name;
+            })
+        );
+
+        loadWordSets();
+
+        forgetMissingSets();
+
+        saveState();
+
+        renderSetSelector();
+
+        startNewRound();
+    }
+
+
+    document
+        .getElementById("addSetSave")
+        .addEventListener("click", saveAddSetDialog);
+
+
+    document
+        .getElementById("addSetCancel")
+        .addEventListener("click", function () {
+
+            addSetDialog.close();
+
+        });
+
+
+    /*
+     * Enter in the name box saves (Enter in
+     * the words box is a new line).
+     */
+
+    document
+        .getElementById("addSetName")
+        .addEventListener("keydown", function (event) {
+
+            if (event.key === "Enter") {
+
+                event.preventDefault();
+
+                saveAddSetDialog();
+            }
+
+        });
 
 
     /*
@@ -1083,7 +1451,11 @@
         "keydown",
         function (event) {
 
-            if (event.key !== "Enter" || stage === null) {
+            if (
+                event.key !== "Enter" ||
+                stage === null ||
+                addSetDialog.open
+            ) {
                 return;
             }
 
@@ -1118,39 +1490,44 @@
      * unless a previous selection was saved.
      */
 
-    (function startGame() {
+    /*
+     * words.js sets first, then pasted ones.
+     */
 
-        wordSets = WORD_SET_TEXTS
-            .map(function (set) {
+    function loadWordSets() {
+
+        const builtIn =
+            WORD_SET_TEXTS.map(function (set) {
                 return {
                     name: set.name,
-                    words: parseWordList(set.text)
+                    words: parseWordList(set.text),
+                    custom: false
                 };
-            })
+            });
+
+        const custom =
+            loadCustomSets().map(function (set) {
+                return {
+                    name: set.name,
+                    words: parseWordList(set.text),
+                    custom: true
+                };
+            });
+
+        wordSets = builtIn
+            .concat(custom)
             .filter(function (set) {
                 return set.words.length > 0;
             });
+    }
 
 
-        if (wordSets.length === 0) {
+    /*
+     * Forget saved sets that have since
+     * been removed or renamed.
+     */
 
-            const message =
-                document.getElementById("message");
-
-            message.textContent =
-                "Couldn't find any words in words/words.js.";
-
-            message.className =
-                "incorrect";
-
-            return;
-        }
-
-
-        /*
-         * Forget saved sets that have since
-         * been removed or renamed.
-         */
+    function forgetMissingSets() {
 
         if (Array.isArray(selectedSets)) {
 
@@ -1169,6 +1546,30 @@
 
             selectedSets = "all";
         }
+    }
+
+
+    (function startGame() {
+
+        loadWordSets();
+
+
+        if (wordSets.length === 0) {
+
+            const message =
+                document.getElementById("message");
+
+            message.textContent =
+                "Couldn't find any words in words/words.js.";
+
+            message.className =
+                "incorrect";
+
+            return;
+        }
+
+
+        forgetMissingSets();
 
         saveState();
 
