@@ -3,9 +3,10 @@
  * SHARED SOUND + ANIMATION UTILITIES
  *
  * Used by MissingNum.html, Muliplication.html,
- * Division.html, MultDivPractice.html and
- * MixedPractice.html (and index.html for the
- * answer box position setting).
+ * Division.html, MultDivPractice.html,
+ * MixedPractice.html and spelling.html (and
+ * maths.html for the answer box position
+ * setting).
  * ==========================================
  */
 
@@ -1970,7 +1971,7 @@ function inputPositionMatches() {
 /*
  * Adds the Left / Centre / Right / Random
  * buttons before the given element.
- * Used on the home page (index.html).
+ * Used on the maths home page (maths.html).
  *
  * "random" replaces the selection.
  *

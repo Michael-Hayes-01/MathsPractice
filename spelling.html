@@ -1,0 +1,1185 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Spelling Practice</title>
+
+    <style>
+        * {
+            box-sizing: border-box;
+        }
+
+        body {
+            font-family: Arial, sans-serif;
+            background: #f4f6f8;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            min-height: 100vh;
+            margin: 0;
+            transition: background-color 0.15s ease;
+            overflow: hidden;
+        }
+
+        /* =========================
+           GREEN FLASH - CORRECT
+           ========================= */
+
+        body.flash-green {
+            animation: greenFlash 1.6s ease-in-out 1;
+        }
+
+        @keyframes greenFlash {
+            0%, 100% {
+                background-color: #f4f6f8;
+            }
+
+            7.5% {
+                background-color: #32cd32;
+            }
+
+            15% {
+                background-color: #f4f6f8;
+            }
+
+            22.5% {
+                background-color: #32cd32;
+            }
+
+            30% {
+                background-color: #f4f6f8;
+            }
+
+            37.5% {
+                background-color: #32cd32;
+            }
+
+            45% {
+                background-color: #f4f6f8;
+            }
+
+            52.5% {
+                background-color: #32cd32;
+            }
+
+            60% {
+                background-color: #f4f6f8;
+            }
+
+            67.5% {
+                background-color: #32cd32;
+            }
+
+            75% {
+                background-color: #f4f6f8;
+            }
+
+            82.5% {
+                background-color: #32cd32;
+            }
+
+            90% {
+                background-color: #f4f6f8;
+            }
+        }
+
+        /* =========================
+           RED FLASH - WRONG
+           ========================= */
+
+        body.flash-red {
+            animation: redFlash 0.8s ease-in-out 1;
+        }
+
+        @keyframes redFlash {
+            0%, 100% {
+                background-color: #f4f6f8;
+            }
+
+            15% {
+                background-color: #ff3b30;
+            }
+
+            30% {
+                background-color: #f4f6f8;
+            }
+
+            45% {
+                background-color: #ff3b30;
+            }
+
+            60% {
+                background-color: #f4f6f8;
+            }
+        }
+
+        /* =========================
+           MAIN CONTAINER
+           ========================= */
+
+        .container {
+            background: white;
+            padding: 40px;
+            border-radius: 12px;
+            box-shadow: 0 4px 15px rgba(0, 0, 0, 0.1);
+            text-align: center;
+            width: 90%;
+            max-width: 650px;
+            position: relative;
+            z-index: 2;
+        }
+
+        h1 {
+            margin-bottom: 8px;
+            color: #333;
+        }
+
+        .subtitle {
+            color: #666;
+            font-size: 18px;
+            margin-bottom: 25px;
+        }
+
+        /* =========================
+           WORD SET SELECTOR
+           ========================= */
+
+        .set-selector {
+            display: flex;
+            justify-content: center;
+            flex-wrap: wrap;
+            gap: 5px;
+            margin-bottom: 10px;
+        }
+
+        .set-selector button {
+            height: 42px;
+            padding: 0 12px;
+            border: 2px solid #333;
+            border-radius: 6px;
+            font-size: 17px;
+            font-weight: bold;
+            cursor: pointer;
+            background: #eee;
+            color: #333;
+        }
+
+        .set-selector button:hover {
+            background: #ddd;
+        }
+
+        .set-selector button.active {
+            background: #333;
+            color: white;
+        }
+
+        #progress {
+            color: #888;
+            font-size: 15px;
+            min-height: 18px;
+        }
+
+        /* =========================
+           WORD
+           ========================= */
+
+        .word-area {
+            margin: 30px 0;
+            min-height: 150px;
+            display: flex;
+            flex-direction: column;
+            justify-content: center;
+            align-items: center;
+            gap: 14px;
+        }
+
+        .word {
+            font-size: 64px;
+            font-weight: bold;
+            letter-spacing: 3px;
+            color: #333;
+        }
+
+        .definition {
+            font-size: 18px;
+            color: #666;
+            font-style: italic;
+            max-width: 480px;
+        }
+
+        .spell-input {
+            width: 100%;
+            max-width: 380px;
+            height: 70px;
+            font-size: 40px;
+            text-align: center;
+            letter-spacing: 2px;
+            border: 2px solid #888;
+            border-radius: 6px;
+        }
+
+        .spell-input:focus {
+            outline: none;
+            border-color: #333;
+        }
+
+        .hidden {
+            display: none;
+        }
+
+        /* =========================
+           ACTION BUTTONS
+           ========================= */
+
+        .actions button {
+            padding: 12px 28px;
+            font-size: 18px;
+            border: none;
+            border-radius: 6px;
+            cursor: pointer;
+            margin: 8px;
+            background: #2e9e44;
+            color: white;
+        }
+
+        .actions button:hover {
+            background: #237a34;
+        }
+
+        /* =========================
+           MESSAGE
+           ========================= */
+
+        #message {
+            margin-top: 20px;
+            font-size: 22px;
+            font-weight: bold;
+            min-height: 28px;
+        }
+
+        .correct {
+            color: green;
+        }
+
+        .incorrect {
+            color: red;
+        }
+
+        /* =========================
+           FIREWORKS
+           ========================= */
+
+        #fireworks {
+            position: fixed;
+            inset: 0;
+            pointer-events: none;
+            z-index: 10;
+        }
+
+        .firework {
+            position: absolute;
+            width: 8px;
+            height: 8px;
+            border-radius: 50%;
+        }
+
+        .spark {
+            position: absolute;
+            left: 0;
+            top: 0;
+            width: 6px;
+            height: 22px;
+            border-radius: 50%;
+            transform-origin: 50% 100%;
+            animation: sparkFly 850ms ease-out forwards;
+        }
+
+        @keyframes sparkFly {
+            0% {
+                transform:
+                    rotate(var(--angle))
+                    translateY(0)
+                    scaleY(0.2);
+                opacity: 1;
+            }
+
+            70% {
+                opacity: 1;
+            }
+
+            100% {
+                transform:
+                    rotate(var(--angle))
+                    translateY(var(--distance))
+                    scaleY(1);
+                opacity: 0;
+            }
+        }
+
+        /* =========================
+           HOME BUTTON
+           ========================= */
+
+        .top-buttons {
+            position: fixed;
+            top: 15px;
+            left: 50%;
+            transform: translateX(-50%);
+            z-index: 5;
+            display: flex;
+            gap: 10px;
+        }
+
+        .home-button {
+            padding: 10px 16px;
+            border-radius: 8px;
+            background: #333;
+            color: white;
+            text-decoration: none;
+            font-size: 16px;
+            font-weight: bold;
+        }
+
+        .home-button:hover {
+            background: #555;
+        }
+
+        /* =========================
+           MOBILE
+           ========================= */
+
+        @media (max-width: 600px) {
+
+            .container {
+                padding: 25px 15px;
+            }
+
+            h1 {
+                font-size: 28px;
+            }
+
+            .set-selector button {
+                height: 38px;
+                font-size: 15px;
+                padding: 0 10px;
+            }
+
+            .word {
+                font-size: 44px;
+            }
+
+            .spell-input {
+                height: 58px;
+                font-size: 30px;
+            }
+        }
+    </style>
+</head>
+
+<body>
+
+<!-- Back goes to the previous page, or up to
+     this page's menu if it was opened directly -->
+<div class="top-buttons">
+    <a
+            class="home-button"
+            href="index.html"
+            onclick="if (document.referrer.startsWith(location.origin)) { history.back(); return false; }"
+    >⬅ Back</a>
+    <a class="home-button" href="index.html">🏠 Home</a>
+</div>
+
+<!-- Fireworks are created here -->
+<div id="fireworks"></div>
+
+<div class="container">
+
+    <h1>Spelling Practice</h1>
+
+    <div class="subtitle">
+        See it, Say it, Spell it
+    </div>
+
+    <!-- =========================
+         WORD SETS (one button per
+         set in words/words.js)
+         ========================= -->
+
+    <div class="set-selector" id="setSelector"></div>
+
+    <div id="progress"></div>
+
+    <!-- =========================
+         WORD / ANSWER BOX
+         ========================= -->
+
+    <div class="word-area">
+
+        <div class="word" id="word"></div>
+
+        <input
+                type="text"
+                id="answer"
+                class="spell-input hidden"
+                aria-label="Spell the word"
+                autocomplete="off"
+                autocorrect="off"
+                autocapitalize="off"
+                spellcheck="false"
+        >
+
+        <div class="definition" id="definition"></div>
+
+    </div>
+
+    <!-- =========================
+         ACTION BUTTONS
+         ========================= -->
+
+    <div class="actions">
+
+        <button id="saidItBtn" class="hidden">
+            OK - I'm ready!
+        </button>
+
+        <button id="submitBtn" class="hidden">
+            Submit
+        </button>
+
+        <button id="nextBtn" class="hidden">
+            Next word ➜
+        </button>
+
+    </div>
+
+    <!-- Feedback -->
+    <div id="message"></div>
+
+</div>
+
+
+<script src="util.js"></script>
+
+<script>
+
+    /*
+     * words/words.js calls addWordSet once for
+     * each word set. It's a script (not .txt
+     * files) so it still loads when this page
+     * is opened by double-clicking it.
+     */
+
+    const WORD_SET_TEXTS = [];
+
+    function addWordSet(name, text) {
+
+        WORD_SET_TEXTS.push({
+            name: name,
+            text: text
+        });
+    }
+
+</script>
+
+<script src="words/words.js"></script>
+
+<script>
+
+    /*
+     * ==========================================
+     * GAME STATE
+     * ==========================================
+     *
+     * Each word goes through these stages:
+     *
+     * "see"  - the word is shown, the child
+     *          says it out loud, then clicks
+     *          "OK - I'm ready!" (or Enter)
+     * "type" - the word is hidden and the
+     *          child types it
+     * "done" - spelled correctly; moves on to
+     *          the next word after a moment
+     *
+     * A wrong spelling goes back to "see" with
+     * the same word.
+     */
+
+    const NEXT_WORD_DELAY = 2500;
+
+    let wordSets = [];
+
+    let queue = [];
+
+    let queueIndex = 0;
+
+    let stage = null;
+
+    let nextWordTimer = null;
+
+
+    /*
+     * ==========================================
+     * PERSISTED STATE
+     * ==========================================
+     *
+     * Remembers which word sets are selected
+     * (by name).
+     */
+
+    const STORAGE_KEY = "spellingPracticeState";
+
+
+    function loadState() {
+
+        try {
+
+            const raw =
+                localStorage.getItem(STORAGE_KEY);
+
+            return raw ? JSON.parse(raw) : {};
+
+        } catch (e) {
+
+            return {};
+        }
+    }
+
+
+    function saveState() {
+
+        try {
+
+            localStorage.setItem(
+                STORAGE_KEY,
+                JSON.stringify({
+                    selectedSets: selectedSets
+                })
+            );
+
+        } catch (e) {}
+    }
+
+
+    /*
+     * Either "all" or a list of set names.
+     */
+
+    let selectedSets =
+        loadState().selectedSets || "all";
+
+
+    /*
+     * ==========================================
+     * READ A WORD LIST
+     * ==========================================
+     *
+     * One word per line, optionally followed by
+     * a definition after a dash:
+     *
+     *     because – Explains why something happens.
+     *
+     * Blank lines and lines starting with #
+     * are ignored.
+     */
+
+    function parseWordList(text) {
+
+        const words = [];
+
+        text.split(/\r?\n/).forEach(function (line) {
+
+            line = line.trim();
+
+            if (line === "" || line.startsWith("#")) {
+                return;
+            }
+
+            const parts = line.split(/\s+[–—-]\s+/);
+
+            const word = parts[0].trim();
+
+            if (word === "") {
+                return;
+            }
+
+            words.push({
+                word: word,
+                definition: parts.slice(1).join(" – ").trim()
+            });
+
+        });
+
+        return words;
+    }
+
+
+    /*
+     * ==========================================
+     * WORD SET BUTTONS
+     * ==========================================
+     *
+     * Works like the times table selector:
+     *
+     * "All" replaces the selection.
+     *
+     * A set toggles on/off, but the last
+     * selected set can't be turned off.
+     */
+
+    function renderSetSelector() {
+
+        const selector =
+            document.getElementById("setSelector");
+
+        selector.innerHTML = "";
+
+
+        function addButton(label, name) {
+
+            const button =
+                document.createElement("button");
+
+            button.textContent = label;
+
+            button.dataset.set = name;
+
+            button.addEventListener("click", function () {
+
+                toggleSet(name);
+
+                button.blur();
+
+            });
+
+            selector.appendChild(button);
+        }
+
+
+        wordSets.forEach(function (set) {
+
+            addButton(
+                `${set.name} (${set.words.length})`,
+                set.name
+            );
+
+        });
+
+        addButton("All", "all");
+
+        updateSetButtons();
+    }
+
+
+    function updateSetButtons() {
+
+        document
+            .querySelectorAll(".set-selector button")
+            .forEach(function (button) {
+
+                const name = button.dataset.set;
+
+                button.classList.toggle(
+                    "active",
+                    selectedSets === "all"
+                        ? name === "all"
+                        : selectedSets.includes(name)
+                );
+
+            });
+    }
+
+
+    function toggleSet(name) {
+
+        if (name === "all") {
+
+            selectedSets = "all";
+
+        } else if (selectedSets === "all") {
+
+            selectedSets = [name];
+
+        } else if (selectedSets.includes(name)) {
+
+            if (selectedSets.length === 1) {
+                return;
+            }
+
+            selectedSets =
+                selectedSets.filter(function (n) {
+                    return n !== name;
+                });
+
+        } else {
+
+            /*
+             * Keep them in words.js order.
+             */
+
+            selectedSets =
+                wordSets
+                    .map(function (set) {
+                        return set.name;
+                    })
+                    .filter(function (n) {
+                        return n === name || selectedSets.includes(n);
+                    });
+        }
+
+        saveState();
+
+        updateSetButtons();
+
+        startNewRound();
+    }
+
+
+    /*
+     * ==========================================
+     * WORD QUEUE
+     * ==========================================
+     *
+     * Every word from the selected sets, once
+     * each (sets can share words), shuffled.
+     * When all have been spelled, reshuffle
+     * and go round again.
+     */
+
+    function shuffle(items) {
+
+        for (let i = items.length - 1; i > 0; i--) {
+
+            const j = Math.floor(Math.random() * (i + 1));
+
+            [items[i], items[j]] = [items[j], items[i]];
+        }
+
+        return items;
+    }
+
+
+    function startNewRound() {
+
+        const seen = new Set();
+
+        queue = [];
+
+        wordSets.forEach(function (set) {
+
+            if (
+                selectedSets !== "all" &&
+                !selectedSets.includes(set.name)
+            ) {
+                return;
+            }
+
+            set.words.forEach(function (entry) {
+
+                const key = entry.word.toLowerCase();
+
+                if (!seen.has(key)) {
+
+                    seen.add(key);
+
+                    queue.push(entry);
+                }
+
+            });
+
+        });
+
+        shuffle(queue);
+
+        queueIndex = 0;
+
+        showWord();
+    }
+
+
+    function currentWord() {
+
+        return queue[queueIndex];
+    }
+
+
+    function nextWord() {
+
+        clearTimeout(nextWordTimer);
+
+        queueIndex++;
+
+        if (queueIndex >= queue.length) {
+
+            startNewRound();
+
+            return;
+        }
+
+        showWord();
+    }
+
+
+    /*
+     * ==========================================
+     * SHOW A NEW WORD
+     * ==========================================
+     */
+
+    function showWord() {
+
+        const message =
+            document.getElementById("message");
+
+        message.textContent = "";
+
+        message.className = "";
+
+        document.getElementById("progress").textContent =
+            `Word ${queueIndex + 1} of ${queue.length}`;
+
+        showSeeStage();
+    }
+
+
+    /*
+     * ==========================================
+     * STAGE 1: SEE IT AND SAY IT
+     * ==========================================
+     */
+
+    function showSeeStage() {
+
+        clearTimeout(nextWordTimer);
+
+        stage = "see";
+
+        const entry = currentWord();
+
+        const word =
+            document.getElementById("word");
+
+        word.textContent = entry.word;
+
+        word.classList.remove("hidden");
+
+        document.getElementById("definition").textContent =
+            entry.definition;
+
+        document.getElementById("answer").classList.add("hidden");
+
+        document.getElementById("saidItBtn").classList.remove("hidden");
+
+        document.getElementById("submitBtn").classList.add("hidden");
+
+        document.getElementById("nextBtn").classList.add("hidden");
+    }
+
+
+    /*
+     * ==========================================
+     * STAGE 2: HIDE IT AND SPELL IT
+     * ==========================================
+     *
+     * The definition stays as a clue.
+     */
+
+    function showTypeStage() {
+
+        stage = "type";
+
+        const message =
+            document.getElementById("message");
+
+        message.textContent = "";
+
+        message.className = "";
+
+        document.getElementById("word").classList.add("hidden");
+
+        document.getElementById("saidItBtn").classList.add("hidden");
+
+        document.getElementById("submitBtn").classList.remove("hidden");
+
+
+        const input =
+            document.getElementById("answer");
+
+        input.value = "";
+
+        input.classList.remove("hidden");
+
+        input.focus();
+    }
+
+
+    /*
+     * ==========================================
+     * SUBMIT SPELLING
+     * ==========================================
+     */
+
+    function submitSpelling() {
+
+        const input =
+            document.getElementById("answer");
+
+        const message =
+            document.getElementById("message");
+
+        const attempt =
+            input.value.trim();
+
+
+        /*
+         * Nothing typed.
+         */
+
+        if (attempt === "") {
+
+            message.textContent =
+                "Please type the word.";
+
+            message.className =
+                "incorrect";
+
+            input.focus();
+
+            return;
+        }
+
+
+        const entry = currentWord();
+
+
+        /*
+         * ======================================
+         * CORRECT
+         * ======================================
+         */
+
+        if (attempt.toLowerCase() === entry.word.toLowerCase()) {
+
+            stage = "done";
+
+            playHappySound();
+
+            /*
+             * Green flash
+             * + a random happy effect
+             */
+
+            celebrateCorrectAnswer();
+
+
+            message.textContent =
+                "Correct! 🎉";
+
+            message.className =
+                "correct";
+
+
+            /*
+             * Show the word again next to the
+             * correct message, then move on.
+             * Enter (or Next) moves on straight
+             * away.
+             */
+
+            input.classList.add("hidden");
+
+            document.getElementById("word").classList.remove("hidden");
+
+            document.getElementById("submitBtn").classList.add("hidden");
+
+            document.getElementById("nextBtn").classList.remove("hidden");
+
+            nextWordTimer =
+                setTimeout(nextWord, NEXT_WORD_DELAY);
+        }
+
+
+        /*
+         * ======================================
+         * WRONG
+         *
+         * Show the same word again to see
+         * and say, then try again.
+         * ======================================
+         */
+
+        else {
+
+            playSadSound();
+
+            flashRed();
+
+
+            message.textContent =
+                `Not quite - you wrote "${attempt}". Look again!`;
+
+            message.className =
+                "incorrect";
+
+
+            showSeeStage();
+        }
+    }
+
+
+    /*
+     * ==========================================
+     * BUTTONS
+     * ==========================================
+     */
+
+    document
+        .getElementById("saidItBtn")
+        .addEventListener(
+            "click",
+            function () {
+
+                showTypeStage();
+
+            }
+        );
+
+
+    document
+        .getElementById("submitBtn")
+        .addEventListener(
+            "click",
+            function () {
+
+                submitSpelling();
+
+            }
+        );
+
+
+    document
+        .getElementById("nextBtn")
+        .addEventListener(
+            "click",
+            function () {
+
+                nextWord();
+
+            }
+        );
+
+
+    /*
+     * ==========================================
+     * ENTER KEY
+     * ==========================================
+     *
+     * See it:     OK - I'm ready
+     * Spell it:   Submit
+     * Correct:    Next word
+     */
+
+    document.addEventListener(
+        "keydown",
+        function (event) {
+
+            if (event.key !== "Enter" || stage === null) {
+                return;
+            }
+
+
+            event.preventDefault();
+
+
+            if (stage === "see") {
+
+                showTypeStage();
+
+            } else if (stage === "type") {
+
+                submitSpelling();
+
+            } else {
+
+                nextWord();
+
+            }
+
+        }
+    );
+
+
+    /*
+     * ==========================================
+     * START GAME
+     * ==========================================
+     *
+     * Starts with every word set selected,
+     * unless a previous selection was saved.
+     */
+
+    (function startGame() {
+
+        wordSets = WORD_SET_TEXTS
+            .map(function (set) {
+                return {
+                    name: set.name,
+                    words: parseWordList(set.text)
+                };
+            })
+            .filter(function (set) {
+                return set.words.length > 0;
+            });
+
+
+        if (wordSets.length === 0) {
+
+            const message =
+                document.getElementById("message");
+
+            message.textContent =
+                "Couldn't find any words in words/words.js.";
+
+            message.className =
+                "incorrect";
+
+            return;
+        }
+
+
+        /*
+         * Forget saved sets that have since
+         * been removed or renamed.
+         */
+
+        if (Array.isArray(selectedSets)) {
+
+            selectedSets =
+                selectedSets.filter(function (name) {
+                    return wordSets.some(function (set) {
+                        return set.name === name;
+                    });
+                });
+
+            if (selectedSets.length === 0) {
+                selectedSets = "all";
+            }
+
+        } else {
+
+            selectedSets = "all";
+        }
+
+        saveState();
+
+
+        renderSetSelector();
+
+        startNewRound();
+
+    })();
+
+</script>
+
+</body>
+</html>

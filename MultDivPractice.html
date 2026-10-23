@@ -266,12 +266,12 @@
         }
 
         #submitBtn {
-            background: #333;
+            background: #2e9e44;
             color: white;
         }
 
         #submitBtn:hover {
-            background: #555;
+            background: #237a34;
         }
 
         #generateBtn {
@@ -366,12 +366,17 @@
            HOME BUTTON
            ========================= */
 
-        .home-button {
+        .top-buttons {
             position: fixed;
             top: 15px;
             left: 50%;
             transform: translateX(-50%);
             z-index: 5;
+            display: flex;
+            gap: 10px;
+        }
+
+        .home-button {
             padding: 10px 16px;
             border-radius: 8px;
             background: #333;
@@ -422,7 +427,16 @@
 
 <body>
 
-<a class="home-button" href="index.html">🏠 Home</a>
+<!-- Back goes to the previous page, or up to
+     this page's menu if it was opened directly -->
+<div class="top-buttons">
+    <a
+            class="home-button"
+            href="maths.html"
+            onclick="if (document.referrer.startsWith(location.origin)) { history.back(); return false; }"
+    >⬅ Back</a>
+    <a class="home-button" href="index.html">🏠 Home</a>
+</div>
 
 <div id="fireworks"></div>
 
