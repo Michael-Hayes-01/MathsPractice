@@ -286,6 +286,51 @@
             color: #888;
             font-size: 15px;
             min-height: 18px;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            flex-wrap: wrap;
+            gap: 6px 18px;
+        }
+
+        #progress.hidden {
+            display: none;
+        }
+
+        .order-toggle {
+            display: flex;
+            border: 2px solid #888;
+            border-radius: 5px;
+            overflow: hidden;
+        }
+
+        .order-toggle button {
+            border: none;
+            padding: 3px 10px;
+            font-size: 14px;
+            cursor: pointer;
+            background: #eee;
+            color: #333;
+        }
+
+        .order-toggle button:hover {
+            background: #ddd;
+        }
+
+        .order-toggle button.active {
+            background: #333;
+            color: white;
+        }
+
+        .start-at select {
+            font-size: 15px;
+            padding: 2px 4px;
+            margin-left: 4px;
+            border: 2px solid #888;
+            border-radius: 5px;
+            background: white;
+            color: #333;
+            cursor: pointer;
         }
 
         /* =========================
@@ -573,7 +618,21 @@
 
     </div>
 
-    <div id="progress"></div>
+    <div id="progress">
+
+        <span id="progressText"></span>
+
+        <label class="start-at" id="startAtLabel">
+            Start at word
+            <select id="startAt" aria-label="Start at word"></select>
+        </label>
+
+        <div class="order-toggle">
+            <button data-order="list">In order</button>
+            <button data-order="random">Random</button>
+        </div>
+
+    </div>
 
     <!-- =========================
          WORD / ANSWER BOX
@@ -689,9 +748,8 @@
      * ==========================================
      *
      * Remembers which word sets are selected
-     * (by name), and for each selection the
-     * shuffled word order and which word is
-     * being practised - so refreshing the page
+     * (by name), and for each selection which
+     * word is being practised - so refreshing the page
      * (or switching sets and back) shows the
      * same word until it is spelled correctly,
      * instead of skipping it.
@@ -724,6 +782,7 @@
                 STORAGE_KEY,
                 JSON.stringify({
                     selectedSets: selectedSets,
+                    order: order,
                     rounds: rounds
                 })
             );
@@ -742,9 +801,18 @@
         persistedState.selectedSets || "all";
 
     /*
-     * Saved rounds by selection:
+     * "list" (the order in words.js) or
+     * "random" (shuffled).
+     */
+
+    let order =
+        persistedState.order === "random" ? "random" : "list";
+
+    /*
+     * Saved place by order + selection:
      *
-     *     { "all": { words: ["happy", ...], index: 3 } }
+     *     { "all": { word: "happy", index: 3 },
+     *       "random:all": { words: ["happy", ...], index: 3 } }
      */
 
     let rounds =
@@ -1222,14 +1290,19 @@
      * ==========================================
      *
      * Every word from the selected sets, once
-     * each (sets can share words), shuffled.
-     * When all have been spelled, reshuffle
-     * and go round again.
+     * each (sets can share words), either in
+     * the order they are listed or shuffled.
+     * After the last word it goes back to the
+     * first (reshuffled when random).
      *
-     * Each selection of sets has its own saved
-     * round, so it carries on from the word it
-     * was on.
+     * Each order + selection of sets has its
+     * own saved place, so it carries on from
+     * the word it was on. In list order the
+     * "Start at" list jumps to word 1, 11, 21...
      */
+
+    const START_AT_STEP = 10;
+
 
     function shuffle(items) {
 
@@ -1249,6 +1322,14 @@
         return selectedSets === "all"
             ? "all"
             : selectedSets.join("|");
+    }
+
+
+    function roundKey() {
+
+        return order === "random"
+            ? "random:" + selectionKey()
+            : selectionKey();
     }
 
 
@@ -1286,27 +1367,48 @@
     }
 
 
-    function saveRound() {
+    /*
+     * Saves the word at index (default: the
+     * current word) as the place to carry on
+     * from. Random also saves the shuffled
+     * order.
+     */
 
-        rounds[selectionKey()] = {
-            words: queue.map(function (entry) {
-                return entry.word;
-            }),
-            index: queueIndex
-        };
+    function saveRound(index) {
+
+        if (index === undefined) {
+            index = queueIndex;
+        }
+
+        rounds[roundKey()] =
+            order === "random"
+                ? {
+                    words: queue.map(function (entry) {
+                        return entry.word;
+                    }),
+                    index: index
+                }
+                : {
+                    word: queue[index].word,
+                    index: index
+                };
 
         saveState();
     }
 
 
     /*
-     * Carries on this selection's saved round,
-     * or shuffles a new one (always, when
+     * Carries on from the saved place, or
+     * starts at the first word (always, when
      * newRound is true).
      *
-     * A saved round is only used if it still
-     * has exactly the selected words - after
-     * words.js is edited it starts afresh.
+     * In list order the place is found by the
+     * saved word, so it survives words being
+     * added to or removed from words.js.
+     *
+     * A saved random order is only used if it
+     * still has exactly the selected words -
+     * otherwise it reshuffles.
      */
 
     function startRound(newRound) {
@@ -1326,41 +1428,161 @@
             return;
         }
 
-        const saved = rounds[selectionKey()];
+        const saved =
+            newRound ? null : rounds[roundKey()];
 
-        const byWord = new Map(
-            words.map(function (entry) {
-                return [entry.word, entry];
-            })
-        );
+        queue = words;
 
-        const savedFits =
-            !newRound &&
-            saved &&
-            Array.isArray(saved.words) &&
-            saved.words.length === words.length &&
-            new Set(saved.words).size === words.length &&
-            saved.words.every(function (word) {
-                return byWord.has(word);
-            }) &&
-            saved.index >= 0 &&
-            saved.index < words.length;
+        queueIndex = 0;
 
-        if (savedFits) {
 
-            queue =
-                saved.words.map(function (word) {
-                    return byWord.get(word);
+        if (order === "random") {
+
+            const byWord = new Map(
+                words.map(function (entry) {
+                    return [entry.word, entry];
+                })
+            );
+
+            const savedFits =
+                saved &&
+                Array.isArray(saved.words) &&
+                saved.words.length === words.length &&
+                new Set(saved.words).size === words.length &&
+                saved.words.every(function (word) {
+                    return byWord.has(word);
+                }) &&
+                saved.index >= 0 &&
+                saved.index < words.length;
+
+            if (savedFits) {
+
+                queue =
+                    saved.words.map(function (word) {
+                        return byWord.get(word);
+                    });
+
+                queueIndex = saved.index;
+
+            } else {
+
+                queue = shuffle(words);
+            }
+
+        } else if (saved) {
+
+            const savedWordIndex =
+                queue.findIndex(function (entry) {
+                    return entry.word === saved.word;
                 });
 
-            queueIndex = saved.index;
+            if (savedWordIndex >= 0) {
 
-        } else {
+                queueIndex = savedWordIndex;
 
-            queue = shuffle(words);
+            } else if (saved.index >= 0) {
 
-            queueIndex = 0;
+                queueIndex =
+                    Math.min(saved.index, queue.length - 1);
+            }
         }
+
+        renderStartAt();
+
+        updateOrderButtons();
+
+        saveRound();
+
+        showWord();
+    }
+
+
+    /*
+     * ==========================================
+     * START AT LIST
+     * ==========================================
+     *
+     * One option per 10 words: 1-10, 11-20...
+     */
+
+    function renderStartAt() {
+
+        const select =
+            document.getElementById("startAt");
+
+        select.innerHTML = "";
+
+        for (let i = 0; i < queue.length; i += START_AT_STEP) {
+
+            const last =
+                Math.min(i + START_AT_STEP, queue.length);
+
+            const option =
+                document.createElement("option");
+
+            option.value = i;
+
+            option.textContent =
+                last === i + 1
+                    ? `${i + 1}`
+                    : `${i + 1}-${last}`;
+
+            select.appendChild(option);
+        }
+    }
+
+
+    /*
+     * ==========================================
+     * IN ORDER / RANDOM
+     * ==========================================
+     */
+
+    function updateOrderButtons() {
+
+        document
+            .querySelectorAll(".order-toggle button")
+            .forEach(function (button) {
+
+                button.classList.toggle(
+                    "active",
+                    button.dataset.order === order
+                );
+
+            });
+
+        /*
+         * Blocks of 10 only mean something
+         * in list order.
+         */
+
+        document
+            .getElementById("startAtLabel")
+            .classList.toggle("hidden", order === "random");
+    }
+
+
+    function setOrder(newOrder) {
+
+        if (newOrder === order) {
+            return;
+        }
+
+        clearTimeout(nextWordTimer);
+
+        order = newOrder;
+
+        saveState();
+
+        startRound(false);
+    }
+
+
+    function startAt(index) {
+
+        clearTimeout(nextWordTimer);
+
+        queueIndex = index;
 
         saveRound();
 
@@ -1412,7 +1634,7 @@
 
         document.getElementById("definition").textContent = "";
 
-        document.getElementById("progress").textContent = "";
+        document.getElementById("progress").classList.add("hidden");
 
         const message =
             document.getElementById("message");
@@ -1434,8 +1656,13 @@
 
         message.className = "";
 
-        document.getElementById("progress").textContent =
+        document.getElementById("progress").classList.remove("hidden");
+
+        document.getElementById("progressText").textContent =
             `Word ${queueIndex + 1} of ${queue.length}`;
+
+        document.getElementById("startAt").value =
+            Math.floor(queueIndex / START_AT_STEP) * START_AT_STEP;
 
         showSeeStage();
     }
@@ -1599,16 +1826,9 @@
              * the next word.
              */
 
-            if (queueIndex + 1 < queue.length) {
-
-                rounds[selectionKey()].index = queueIndex + 1;
-
-            } else {
-
-                delete rounds[selectionKey()];
-            }
-
-            saveState();
+            saveRound(
+                (queueIndex + 1) % queue.length
+            );
 
 
             nextWordTimer =
@@ -1687,6 +1907,39 @@
 
 
     document
+        .querySelectorAll(".order-toggle button")
+        .forEach(function (button) {
+
+            button.addEventListener("click", function () {
+
+                setOrder(button.dataset.order);
+
+                button.blur();
+
+            });
+
+        });
+
+
+    document
+        .getElementById("startAt")
+        .addEventListener(
+            "change",
+            function (event) {
+
+                startAt(Number(event.target.value));
+
+                /*
+                 * So Enter goes back to the game.
+                 */
+
+                event.target.blur();
+
+            }
+        );
+
+
+    document
         .getElementById("addSetBtn")
         .addEventListener(
             "click",
@@ -1745,7 +1998,10 @@
              * there is a new line, not the game.
              */
 
-            if (event.target.closest("#addSetPanel")) {
+            if (
+                event.target.closest &&
+                event.target.closest("#addSetPanel")
+            ) {
                 return;
             }
 
