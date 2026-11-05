@@ -1,0 +1,1963 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Punctuation Practice</title>
+
+    <style>
+        * {
+            box-sizing: border-box;
+        }
+
+        body {
+            font-family: Arial, sans-serif;
+            background: #f4f6f8;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            min-height: 100vh;
+            margin: 0;
+            padding: 80px 0 30px;
+            transition: background-color 0.15s ease;
+            overflow-x: hidden;
+        }
+
+        /* =========================
+           GREEN FLASH - CORRECT
+           ========================= */
+
+        body.flash-green {
+            animation: greenFlash 1.6s ease-in-out 1;
+        }
+
+        @keyframes greenFlash {
+            0%, 15%, 30%, 45%, 60%, 75%, 90%, 100% {
+                background-color: #f4f6f8;
+            }
+
+            7.5%, 22.5%, 37.5%, 52.5%, 67.5%, 82.5% {
+                background-color: #32cd32;
+            }
+        }
+
+        /* =========================
+           RED FLASH - WRONG
+           ========================= */
+
+        body.flash-red {
+            animation: redFlash 0.8s ease-in-out 1;
+        }
+
+        @keyframes redFlash {
+            0%, 30%, 60%, 100% {
+                background-color: #f4f6f8;
+            }
+
+            15%, 45% {
+                background-color: #ff3b30;
+            }
+        }
+
+        /* =========================
+           MAIN CONTAINER
+           ========================= */
+
+        .container {
+            background: white;
+            padding: 40px;
+            border-radius: 12px;
+            box-shadow: 0 4px 15px rgba(0, 0, 0, 0.1);
+            text-align: center;
+            width: 90%;
+            max-width: 760px;
+            position: relative;
+            z-index: 2;
+        }
+
+        h1 {
+            margin-top: 0;
+            margin-bottom: 8px;
+            color: #333;
+        }
+
+        .subtitle {
+            color: #666;
+            font-size: 18px;
+            margin-bottom: 25px;
+        }
+
+        .hidden {
+            display: none !important;
+        }
+
+        /* =========================
+           MARK SELECTOR
+           ========================= */
+
+        .mark-selector {
+            display: flex;
+            justify-content: center;
+            flex-wrap: wrap;
+            gap: 5px;
+            margin-bottom: 20px;
+        }
+
+        .mark-selector button {
+            height: 42px;
+            padding: 0 12px;
+            border: 2px solid #333;
+            border-radius: 6px;
+            font-size: 17px;
+            font-weight: bold;
+            cursor: pointer;
+            background: #eee;
+            color: #333;
+        }
+
+        .mark-selector button:hover {
+            background: #ddd;
+        }
+
+        .mark-selector button.active {
+            background: #333;
+            color: white;
+        }
+
+        .mark-symbol {
+            display: inline-block;
+            min-width: 14px;
+            margin-right: 4px;
+            font-size: 22px;
+        }
+
+        /* =========================
+           TIP CARD
+           ========================= */
+
+        .tip {
+            display: flex;
+            align-items: center;
+            gap: 14px;
+            text-align: left;
+            background: #f4f6f8;
+            border-radius: 8px;
+            padding: 12px 16px;
+            margin-bottom: 18px;
+        }
+
+        .tip-icon {
+            font-size: 36px;
+            line-height: 1;
+        }
+
+        .tip-name {
+            font-weight: bold;
+            font-size: 18px;
+            color: #333;
+        }
+
+        .tip-text {
+            color: #555;
+            font-size: 16px;
+            margin: 3px 0;
+        }
+
+        .tip-example {
+            color: #333;
+            font-size: 17px;
+            font-style: italic;
+        }
+
+        .tip-example .highlight {
+            color: #1a73e8;
+            font-weight: bold;
+            font-style: normal;
+            font-size: 22px;
+        }
+
+        /* =========================
+           BRUSHES (which mark a tap adds)
+           ========================= */
+
+        .brush-label {
+            color: #666;
+            font-size: 15px;
+            margin-bottom: 6px;
+        }
+
+        .brushes {
+            display: flex;
+            justify-content: center;
+            flex-wrap: wrap;
+            gap: 8px;
+            margin-bottom: 14px;
+        }
+
+        .brushes button {
+            min-width: 64px;
+            height: 64px;
+            padding: 0 12px;
+            border: 3px solid #888;
+            border-radius: 10px;
+            font-size: 13px;
+            cursor: pointer;
+            background: white;
+            color: #333;
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            justify-content: center;
+            line-height: 1.1;
+        }
+
+        .brushes button .mark-symbol {
+            margin: 0;
+            font-size: 30px;
+            font-weight: bold;
+        }
+
+        .brushes button:hover {
+            background: #f0f0f0;
+        }
+
+        .brushes button.active {
+            border-color: #1a73e8;
+            background: #e8f0fe;
+            color: #1a73e8;
+        }
+
+        #counts {
+            display: flex;
+            justify-content: center;
+            flex-wrap: wrap;
+            gap: 6px 18px;
+            color: #888;
+            font-size: 15px;
+            min-height: 18px;
+        }
+
+        /*
+         * Not green - the right number of marks
+         * can still be in the wrong places.
+         */
+
+        #counts .done {
+            color: #333;
+            font-weight: bold;
+        }
+
+        /* =========================
+           PASSAGE
+           ========================= */
+
+        .passage {
+            margin: 20px 0;
+            padding: 20px;
+            border: 2px solid #ddd;
+            border-radius: 10px;
+            text-align: left;
+            font-size: 28px;
+            line-height: 2.1;
+            color: #333;
+            user-select: none;
+            -webkit-user-select: none;
+        }
+
+        .word {
+            cursor: pointer;
+            border-radius: 4px;
+        }
+
+        .word:hover {
+            background: #f0f4ff;
+        }
+
+        /*
+         * The gap between two words, which
+         * also works as the space.
+         */
+
+        .gap {
+            display: inline-block;
+            min-width: 0.55em;
+            padding-right: 0.25em;
+            text-align: left;
+            cursor: pointer;
+            border-radius: 4px;
+            font-weight: bold;
+        }
+
+        .gap:hover {
+            background: #e8f0fe;
+        }
+
+        .gap .placed {
+            color: #1a73e8;
+        }
+
+        .gap .fixed {
+            color: #333;
+            font-weight: normal;
+        }
+
+        .gap .open-quote {
+            margin-left: 0.25em;
+        }
+
+        .gap.wrong {
+            background: #ffd6d6;
+        }
+
+        .gap.wrong .placed {
+            color: red;
+        }
+
+        .gap.revealed {
+            background: #fff0b3;
+        }
+
+        .gap.revealed .placed {
+            color: #c77700;
+        }
+
+        /* =========================
+           ACTION BUTTONS
+           ========================= */
+
+        .actions button {
+            padding: 12px 28px;
+            font-size: 18px;
+            border: none;
+            border-radius: 6px;
+            cursor: pointer;
+            margin: 6px;
+            background: #2e9e44;
+            color: white;
+        }
+
+        .actions button:hover {
+            background: #237a34;
+        }
+
+        .actions button.secondary {
+            background: #eee;
+            color: #333;
+            border: 2px solid #333;
+        }
+
+        .actions button.secondary:hover {
+            background: #ddd;
+        }
+
+        /* =========================
+           MESSAGE
+           ========================= */
+
+        #message {
+            margin-top: 16px;
+            font-size: 22px;
+            font-weight: bold;
+            min-height: 28px;
+        }
+
+        .correct {
+            color: green;
+        }
+
+        .incorrect {
+            color: red;
+        }
+
+        /* =========================
+           FIREWORKS
+           ========================= */
+
+        #fireworks {
+            position: fixed;
+            inset: 0;
+            pointer-events: none;
+            z-index: 10;
+        }
+
+        .firework {
+            position: absolute;
+            width: 8px;
+            height: 8px;
+            border-radius: 50%;
+        }
+
+        .spark {
+            position: absolute;
+            left: 0;
+            top: 0;
+            width: 6px;
+            height: 22px;
+            border-radius: 50%;
+            transform-origin: 50% 100%;
+            animation: sparkFly 850ms ease-out forwards;
+        }
+
+        @keyframes sparkFly {
+            0% {
+                transform:
+                    rotate(var(--angle))
+                    translateY(0)
+                    scaleY(0.2);
+                opacity: 1;
+            }
+
+            70% {
+                opacity: 1;
+            }
+
+            100% {
+                transform:
+                    rotate(var(--angle))
+                    translateY(var(--distance))
+                    scaleY(1);
+                opacity: 0;
+            }
+        }
+
+        /* =========================
+           HOME BUTTON
+           ========================= */
+
+        .top-buttons {
+            position: fixed;
+            top: 15px;
+            left: 50%;
+            transform: translateX(-50%);
+            z-index: 5;
+            display: flex;
+            gap: 10px;
+        }
+
+        .home-button {
+            display: inline-flex;
+            align-items: center;
+            gap: 6px;
+            padding: 10px 16px;
+            border-radius: 8px;
+            background: #333;
+            color: white;
+            text-decoration: none;
+            font-size: 16px;
+            font-weight: bold;
+        }
+
+        .home-button:hover {
+            background: #555;
+        }
+
+        .nav-icon {
+            font-size: 26px;
+            line-height: 1;
+        }
+
+        /* =========================
+           MOBILE
+           ========================= */
+
+        @media (max-width: 600px) {
+
+            .container {
+                padding: 25px 15px;
+            }
+
+            h1 {
+                font-size: 28px;
+            }
+
+            .mark-selector button {
+                height: 38px;
+                font-size: 15px;
+                padding: 0 10px;
+            }
+
+            .passage {
+                font-size: 22px;
+                padding: 12px;
+            }
+
+            .tip-icon {
+                font-size: 28px;
+            }
+        }
+    </style>
+</head>
+
+<body>
+
+<!-- Back goes to the previous page, or up to
+     this page's menu if it was opened directly -->
+<div class="top-buttons">
+    <a
+            class="home-button"
+            href="index.html"
+            onclick="if (document.referrer.startsWith(location.origin)) { history.back(); return false; }"
+    ><span class="nav-icon">⬅️</span> Back</a>
+    <a class="home-button" href="index.html"><span class="nav-icon">🏠</span> Home</a>
+</div>
+
+<!-- Fireworks are created here -->
+<div id="fireworks"></div>
+
+<div class="container">
+
+    <h1>Punctuation Practice</h1>
+
+    <div class="subtitle">
+        Put the missing marks back in
+    </div>
+
+    <!-- One button per mark, plus All -->
+    <div class="mark-selector" id="markSelector"></div>
+
+    <!-- What the chosen mark does -->
+    <div class="tip" id="tip">
+        <div class="tip-icon" id="tipIcon"></div>
+        <div>
+            <div class="tip-name" id="tipName"></div>
+            <div class="tip-text" id="tipText"></div>
+            <div class="tip-example" id="tipExample"></div>
+        </div>
+    </div>
+
+    <div class="brush-label">
+        Pick a mark, then tap the end of the word it goes after.
+        Tap it again to take it away.
+    </div>
+
+    <div class="brushes" id="brushes"></div>
+
+    <div id="counts"></div>
+
+    <div class="passage" id="passage"></div>
+
+    <div class="actions">
+
+        <button id="checkBtn">
+            Check ✔
+        </button>
+
+        <button id="listenBtn" class="secondary">
+            🔊 Listen
+        </button>
+
+        <button id="clearBtn" class="secondary">
+            Clear
+        </button>
+
+        <button id="showMeBtn" class="secondary hidden">
+            Show me
+        </button>
+
+        <button id="nextBtn" class="hidden">
+            Next ➜
+        </button>
+
+    </div>
+
+    <!-- Feedback -->
+    <div id="message"></div>
+
+</div>
+
+
+<script src="util.js"></script>
+
+<script>
+
+    /*
+     * punctuation/passages.js calls addPassage
+     * once for each passage. It's a script so
+     * it still loads when this page is opened
+     * by double-clicking it.
+     */
+
+    const PASSAGE_TEXTS = [];
+
+    function addPassage(text) {
+
+        PASSAGE_TEXTS.push(
+            text.trim().replace(/\s+/g, " ")
+        );
+    }
+
+</script>
+
+<script src="punctuation/passages.js"></script>
+
+<script>
+
+    /*
+     * ==========================================
+     * THE MARKS
+     * ==========================================
+     *
+     * In order of importance - the order of
+     * the buttons. Question marks aren't
+     * practised, so they always stay in.
+     */
+
+    const QUOTE = '"';
+
+    const MARKS = [
+        {
+            mark: ".",
+            name: "Full stop",
+            plural: "Full stops",
+            icon: "🛑",
+            tip: "Ends a sentence. Stop and take a breath. The next word starts with a capital letter.",
+            example: "The dog barked. It wanted a walk."
+        },
+        {
+            mark: ",",
+            name: "Comma",
+            plural: "Commas",
+            icon: "⏸️",
+            tip: "A short pause. It goes between things in a list, or after a starter like \"After lunch\".",
+            example: "After lunch, I ate apples, pears and grapes."
+        },
+        {
+            mark: "!",
+            name: "Exclamation mark",
+            plural: "Exclamation marks",
+            icon: "😲",
+            tip: "Ends a sentence that is surprised, excited, loud or cross.",
+            example: "Watch out! What a big dog!"
+        },
+        {
+            mark: QUOTE,
+            name: "Speech marks",
+            plural: "Speech marks",
+            icon: "💬",
+            tip: "Go around the words someone says out loud. The comma, ! or full stop goes inside them.",
+            example: "\"Come here,\" said Mum."
+        },
+        {
+            mark: ":",
+            name: "Colon",
+            plural: "Colons",
+            icon: "👉",
+            tip: "Means \"here it comes\". It goes before a list or before explaining something.",
+            example: "Pack three things: a hat, a coat and a scarf."
+        },
+        {
+            mark: ";",
+            name: "Semicolon",
+            plural: "Semicolons",
+            icon: "🔗",
+            tip: "Joins two sentences that belong together. Stronger than a comma, but softer than a full stop.",
+            example: "It was raining; we stayed inside."
+        }
+    ];
+
+    const SENTENCE_ENDS = [".", "!", "?"];
+
+
+    function markInfo(mark) {
+
+        return MARKS.find(function (info) {
+            return info.mark === mark;
+        });
+    }
+
+
+    /*
+     * Straight speech marks become curly ones.
+     */
+
+    function curlyQuotes(text) {
+
+        let open = true;
+
+        return text.replace(/"/g, function () {
+
+            const quote = open ? "“" : "”";
+
+            open = !open;
+
+            return quote;
+        });
+    }
+
+
+    /*
+     * ==========================================
+     * READ A PASSAGE
+     * ==========================================
+     *
+     * A passage is its words, and the gaps
+     * around them: gap 0 is before the first
+     * word, gap i is between word i-1 and
+     * word i, and the last gap is after the
+     * last word.
+     *
+     * Each gap holds at most one mark (. , ! ?
+     * : ;) and maybe a speech mark, e.g. the
+     * gap after "one" in:
+     *
+     *     "Only one," said Dad.
+     *
+     * holds { mark: ",", quote: true }.
+     */
+
+    function parsePassage(text) {
+
+        const words = [];
+
+        const gaps = [
+            { mark: null, quote: false }
+        ];
+
+        text.split(" ").forEach(function (token) {
+
+            const parts =
+                token.match(/^("?)(.*?)([.,!?:;]?)("?)$/);
+
+            const gapBefore = gaps[gaps.length - 1];
+
+            if (parts[1] !== "") {
+
+                if (gapBefore.quote) {
+                    console.warn("Two speech marks in one gap:", text);
+                }
+
+                gapBefore.quote = true;
+            }
+
+            words.push(parts[2]);
+
+            gaps.push({
+                mark: parts[3] || null,
+                quote: parts[4] !== ""
+            });
+
+        });
+
+        return {
+            text: text,
+            words: words,
+            gaps: gaps
+        };
+    }
+
+
+    /*
+     * Whether each gap's speech mark opens or
+     * closes the speech ("open", "close" or
+     * null when it has none), counting from
+     * the start.
+     */
+
+    function quoteKinds(gaps) {
+
+        let open = true;
+
+        return gaps.map(function (gap) {
+
+            if (!gap.quote) {
+                return null;
+            }
+
+            const kind = open ? "open" : "close";
+
+            open = !open;
+
+            return kind;
+        });
+    }
+
+
+    /*
+     * Whether the word after this gap starts
+     * a sentence (or someone's speech).
+     *
+     * After closing speech marks it can't
+     * tell ("Stop!" shouted Tom / "Stop!" The
+     * car...), so it keeps the passage's own
+     * capital letter.
+     */
+
+    function startsSentence(index, gap, quoteKind, hasCapital) {
+
+        if (index === 0 || quoteKind === "open") {
+            return true;
+        }
+
+        if (quoteKind === "close") {
+            return hasCapital;
+        }
+
+        return SENTENCE_ENDS.includes(gap.mark);
+    }
+
+
+    function hasCapital(word) {
+
+        return word[0] !== word[0].toLowerCase();
+    }
+
+
+    const passages =
+        PASSAGE_TEXTS.map(parsePassage);
+
+
+    /*
+     * Names (and other words that always have
+     * a capital): any word with a capital
+     * letter in the middle of a sentence, in
+     * any passage. Other words get a capital
+     * letter only where the child's marks
+     * start a sentence - so adding a full stop
+     * capitalises the next word.
+     */
+
+    const ALWAYS_CAPITAL = new Set();
+
+    passages.forEach(function (passage) {
+
+        const kinds = quoteKinds(passage.gaps);
+
+        passage.words.forEach(function (word, i) {
+
+            if (
+                hasCapital(word) &&
+                !startsSentence(i, passage.gaps[i], kinds[i], true)
+            ) {
+                ALWAYS_CAPITAL.add(word);
+            }
+
+        });
+
+    });
+
+
+    /*
+     * ==========================================
+     * GAME STATE
+     * ==========================================
+     *
+     * "play" - adding marks
+     * "done" - right (or shown); Next moves on
+     */
+
+    const SHOW_ME_AFTER = 2;
+
+    let queue = [];
+
+    let queueIndex = 0;
+
+    let passage = null;
+
+    /*
+     * The marks the child has put in each gap:
+     * { mark, quote }.
+     */
+
+    let placed = [];
+
+    let wrongGaps = new Set();
+
+    let revealedGaps = new Set();
+
+    let failedChecks = 0;
+
+    let stage = null;
+
+    let brush = ".";
+
+
+    /*
+     * ==========================================
+     * PERSISTED STATE
+     * ==========================================
+     *
+     * Which marks are selected, and the
+     * passage being worked on - so refreshing
+     * shows the same passage until it's done.
+     */
+
+    const STORAGE_KEY = "punctuationPracticeState";
+
+
+    function loadState() {
+
+        try {
+
+            const raw =
+                localStorage.getItem(STORAGE_KEY);
+
+            return raw ? JSON.parse(raw) : {};
+
+        } catch (e) {
+
+            return {};
+        }
+    }
+
+
+    function saveState() {
+
+        try {
+
+            localStorage.setItem(
+                STORAGE_KEY,
+                JSON.stringify({
+                    selectedMarks: selectedMarks,
+                    passage: stage === "play" ? passage.text : null
+                })
+            );
+
+        } catch (e) {}
+    }
+
+
+    const persistedState = loadState();
+
+    /*
+     * Either "all" or a list of marks. Starts
+     * on full stops, the most important one.
+     */
+
+    let selectedMarks =
+        persistedState.selectedMarks || ["."];
+
+    if (Array.isArray(selectedMarks)) {
+
+        selectedMarks =
+            selectedMarks.filter(markInfo);
+
+        if (selectedMarks.length === 0) {
+            selectedMarks = ["."];
+        }
+
+    } else {
+
+        selectedMarks = "all";
+    }
+
+
+    function isSelected(mark) {
+
+        return selectedMarks === "all" ||
+            selectedMarks.includes(mark);
+    }
+
+
+    function selectedMarkList() {
+
+        return MARKS
+            .map(function (info) {
+                return info.mark;
+            })
+            .filter(isSelected);
+    }
+
+
+    /*
+     * ==========================================
+     * GAPS
+     * ==========================================
+     *
+     * Marks that aren't being practised are
+     * fixed - always shown, and can't be
+     * changed.
+     */
+
+    function fixedPart(i) {
+
+        const source = passage.gaps[i];
+
+        return {
+            mark:
+                source.mark && !isSelected(source.mark)
+                    ? source.mark
+                    : null,
+            quote: source.quote && !isSelected(QUOTE)
+        };
+    }
+
+
+    function expectedPart(i) {
+
+        const source = passage.gaps[i];
+
+        return {
+            mark:
+                source.mark && isSelected(source.mark)
+                    ? source.mark
+                    : null,
+            quote: source.quote && isSelected(QUOTE)
+        };
+    }
+
+
+    /*
+     * What the gap shows: fixed marks plus
+     * the child's.
+     */
+
+    function shownGap(i) {
+
+        const fixed = fixedPart(i);
+
+        return {
+            mark: fixed.mark || placed[i].mark,
+            quote: fixed.quote || placed[i].quote
+        };
+    }
+
+
+    /*
+     * Tapping a gap adds the brush mark, or
+     * takes it away if it's already there.
+     * A gap only holds one mark, so a
+     * different one replaces it.
+     */
+
+    function tapGap(i) {
+
+        if (stage !== "play") {
+            return;
+        }
+
+        const fixed = fixedPart(i);
+
+        if (brush === QUOTE) {
+
+            if (fixed.quote) {
+                return;
+            }
+
+            placed[i].quote = !placed[i].quote;
+
+        } else {
+
+            /*
+             * Nothing goes before the first
+             * word except speech marks.
+             */
+
+            if (fixed.mark || i === 0) {
+                return;
+            }
+
+            placed[i].mark =
+                placed[i].mark === brush ? null : brush;
+        }
+
+        wrongGaps.delete(i);
+
+        renderPassage();
+    }
+
+
+    /*
+     * Tapping the right half of a word is the
+     * gap after it, the left half the gap
+     * before it (for opening speech marks).
+     */
+
+    function tapWord(i, event) {
+
+        const rect =
+            event.currentTarget.getBoundingClientRect();
+
+        const leftHalf =
+            event.clientX < rect.left + rect.width / 2;
+
+        tapGap(
+            leftHalf && brush === QUOTE ? i : i + 1
+        );
+    }
+
+
+    /*
+     * ==========================================
+     * DRAW THE PASSAGE
+     * ==========================================
+     */
+
+    function shownWord(i, gaps, kinds) {
+
+        const word = passage.words[i];
+
+        if (/^I('|$)/.test(word) || ALWAYS_CAPITAL.has(word)) {
+            return word;
+        }
+
+        const capital =
+            startsSentence(i, gaps[i], kinds[i], hasCapital(word));
+
+        return (capital
+            ? word[0].toUpperCase()
+            : word[0].toLowerCase()) + word.slice(1);
+    }
+
+
+    function renderPassage() {
+
+        const box =
+            document.getElementById("passage");
+
+        box.innerHTML = "";
+
+        const gaps =
+            passage.gaps.map(function (gap, i) {
+                return shownGap(i);
+            });
+
+        const kinds = quoteKinds(gaps);
+
+
+        gaps.forEach(function (gap, i) {
+
+            const fixed = fixedPart(i);
+
+            const gapElement =
+                document.createElement("span");
+
+            gapElement.className = "gap";
+
+            gapElement.classList.toggle("wrong", wrongGaps.has(i));
+
+            gapElement.classList.toggle("revealed", revealedGaps.has(i));
+
+
+            if (gap.mark) {
+
+                const mark =
+                    document.createElement("span");
+
+                mark.className = fixed.mark ? "fixed" : "placed";
+
+                mark.textContent = gap.mark;
+
+                gapElement.appendChild(mark);
+            }
+
+            if (gap.quote) {
+
+                const quote =
+                    document.createElement("span");
+
+                quote.className = fixed.quote ? "fixed" : "placed";
+
+                if (kinds[i] === "open") {
+
+                    quote.textContent = "“";
+
+                    if (gap.mark) {
+                        quote.classList.add("open-quote");
+                    }
+
+                } else {
+
+                    quote.textContent = "”";
+                }
+
+                gapElement.appendChild(quote);
+            }
+
+            gapElement.addEventListener("click", function () {
+
+                tapGap(i);
+
+            });
+
+            box.appendChild(gapElement);
+
+
+            if (i < passage.words.length) {
+
+                const word =
+                    document.createElement("span");
+
+                word.className = "word";
+
+                word.textContent = shownWord(i, gaps, kinds);
+
+                word.addEventListener("click", function (event) {
+
+                    tapWord(i, event);
+
+                });
+
+                box.appendChild(word);
+            }
+
+        });
+
+        renderCounts();
+    }
+
+
+    /*
+     * "Full stops 2 of 3" for each selected
+     * mark in this passage.
+     */
+
+    function renderCounts() {
+
+        const counts =
+            document.getElementById("counts");
+
+        counts.innerHTML = "";
+
+        selectedMarkList().forEach(function (mark) {
+
+            let needed = 0;
+
+            let added = 0;
+
+            passage.gaps.forEach(function (gap, i) {
+
+                const expected = expectedPart(i);
+
+                if (mark === QUOTE) {
+
+                    needed += expected.quote ? 1 : 0;
+
+                    added += placed[i].quote ? 1 : 0;
+
+                } else {
+
+                    needed += expected.mark === mark ? 1 : 0;
+
+                    added += placed[i].mark === mark ? 1 : 0;
+                }
+
+            });
+
+            if (needed === 0) {
+                return;
+            }
+
+            const count =
+                document.createElement("span");
+
+            count.textContent =
+                `${markInfo(mark).plural}: ${added} of ${needed}`;
+
+            count.classList.toggle("done", added === needed);
+
+            counts.appendChild(count);
+
+        });
+    }
+
+
+    /*
+     * ==========================================
+     * MARK BUTTONS, BRUSHES AND TIP
+     * ==========================================
+     *
+     * The mark buttons work like the spelling
+     * word sets: "All" replaces the
+     * selection, a mark toggles on/off, but
+     * the last one can't be turned off.
+     */
+
+    function renderMarkSelector() {
+
+        const selector =
+            document.getElementById("markSelector");
+
+        function addButton(label, symbol, mark) {
+
+            const button =
+                document.createElement("button");
+
+            if (symbol) {
+
+                const symbolElement =
+                    document.createElement("span");
+
+                symbolElement.className = "mark-symbol";
+
+                symbolElement.textContent = symbol;
+
+                button.appendChild(symbolElement);
+            }
+
+            button.appendChild(document.createTextNode(label));
+
+            button.dataset.mark = mark;
+
+            button.addEventListener("click", function () {
+
+                toggleMark(mark);
+
+                button.blur();
+
+            });
+
+            selector.appendChild(button);
+        }
+
+        MARKS.forEach(function (info) {
+
+            addButton(
+                info.name,
+                info.mark === QUOTE ? "“ ”" : info.mark,
+                info.mark
+            );
+
+        });
+
+        addButton("All", "", "all");
+    }
+
+
+    function updateMarkButtons() {
+
+        document
+            .querySelectorAll(".mark-selector button")
+            .forEach(function (button) {
+
+                const mark = button.dataset.mark;
+
+                button.classList.toggle(
+                    "active",
+                    selectedMarks === "all"
+                        ? mark === "all"
+                        : selectedMarks.includes(mark)
+                );
+
+            });
+    }
+
+
+    function toggleMark(mark) {
+
+        if (mark === "all") {
+
+            selectedMarks = "all";
+
+        } else if (selectedMarks === "all") {
+
+            selectedMarks = [mark];
+
+        } else if (selectedMarks.includes(mark)) {
+
+            if (selectedMarks.length === 1) {
+                return;
+            }
+
+            selectedMarks =
+                selectedMarks.filter(function (m) {
+                    return m !== mark;
+                });
+
+        } else {
+
+            selectedMarks =
+                MARKS
+                    .map(function (info) {
+                        return info.mark;
+                    })
+                    .filter(function (m) {
+                        return m === mark || selectedMarks.includes(m);
+                    });
+        }
+
+        /*
+         * Start with the newly picked mark.
+         */
+
+        if (mark !== "all") {
+            brush = mark;
+        }
+
+        updateMarkButtons();
+
+        startRound(passage ? passage.text : null);
+    }
+
+
+    function renderBrushes() {
+
+        const brushes =
+            document.getElementById("brushes");
+
+        brushes.innerHTML = "";
+
+        const marks = selectedMarkList();
+
+        if (!marks.includes(brush)) {
+            brush = marks[0];
+        }
+
+        marks.forEach(function (mark) {
+
+            const info = markInfo(mark);
+
+            const button =
+                document.createElement("button");
+
+            button.title = info.name;
+
+            button.classList.toggle("active", mark === brush);
+
+            const symbol =
+                document.createElement("span");
+
+            symbol.className = "mark-symbol";
+
+            symbol.textContent = mark === QUOTE ? "“ ”" : mark;
+
+            button.appendChild(symbol);
+
+            button.appendChild(document.createTextNode(info.name));
+
+            button.addEventListener("click", function () {
+
+                setBrush(mark);
+
+                button.blur();
+
+            });
+
+            brushes.appendChild(button);
+
+        });
+
+        renderTip();
+    }
+
+
+    function setBrush(mark) {
+
+        brush = mark;
+
+        renderBrushes();
+    }
+
+
+    /*
+     * What the brush mark does, with an
+     * example where the mark is highlighted.
+     */
+
+    function renderTip() {
+
+        const info = markInfo(brush);
+
+        document.getElementById("tipIcon").textContent = info.icon;
+
+        document.getElementById("tipName").textContent = info.name;
+
+        document.getElementById("tipText").textContent = info.tip;
+
+
+        const example =
+            document.getElementById("tipExample");
+
+        example.innerHTML = "";
+
+        const highlightChars =
+            info.mark === QUOTE ? ["“", "”"] : [info.mark];
+
+        Array.from(curlyQuotes(info.example)).forEach(function (char) {
+
+            if (highlightChars.includes(char)) {
+
+                const highlight =
+                    document.createElement("span");
+
+                highlight.className = "highlight";
+
+                highlight.textContent = char;
+
+                example.appendChild(highlight);
+
+            } else {
+
+                example.appendChild(document.createTextNode(char));
+            }
+
+        });
+    }
+
+
+    /*
+     * ==========================================
+     * PASSAGE QUEUE
+     * ==========================================
+     *
+     * The passages that have at least one of
+     * the selected marks, shuffled. After the
+     * last one it reshuffles.
+     */
+
+    function shuffle(items) {
+
+        for (let i = items.length - 1; i > 0; i--) {
+
+            const j = Math.floor(Math.random() * (i + 1));
+
+            [items[i], items[j]] = [items[j], items[i]];
+        }
+
+        return items;
+    }
+
+
+    function usesSelectedMark(candidate) {
+
+        return candidate.gaps.some(function (gap) {
+            return (gap.mark && isSelected(gap.mark)) ||
+                (gap.quote && isSelected(QUOTE));
+        });
+    }
+
+
+    /*
+     * Starts a new shuffle, keeping the
+     * passage with keepText first if it has
+     * any of the selected marks.
+     */
+
+    function startRound(keepText) {
+
+        queue = shuffle(passages.filter(usesSelectedMark));
+
+        queueIndex = 0;
+
+        const keepIndex =
+            queue.findIndex(function (candidate) {
+                return candidate.text === keepText;
+            });
+
+        if (keepIndex > 0) {
+
+            queue.unshift(queue.splice(keepIndex, 1)[0]);
+        }
+
+        renderBrushes();
+
+        showPassage();
+    }
+
+
+    function nextPassage() {
+
+        queueIndex++;
+
+        if (queueIndex >= queue.length) {
+
+            const last = passage;
+
+            startRound(null);
+
+            /*
+             * Don't show the same one twice
+             * in a row.
+             */
+
+            if (queue.length > 1 && queue[0] === last) {
+
+                queue.push(queue.shift());
+
+                showPassage();
+            }
+
+            return;
+        }
+
+        showPassage();
+    }
+
+
+    function showPassage() {
+
+        stopListening();
+
+        passage = queue[queueIndex];
+
+        placed = passage.gaps.map(function () {
+            return { mark: null, quote: false };
+        });
+
+        wrongGaps = new Set();
+
+        revealedGaps = new Set();
+
+        failedChecks = 0;
+
+        stage = "play";
+
+        saveState();
+
+        showMessage("", "");
+
+        document.getElementById("checkBtn").classList.remove("hidden");
+
+        document.getElementById("clearBtn").classList.remove("hidden");
+
+        document.getElementById("showMeBtn").classList.add("hidden");
+
+        document.getElementById("nextBtn").classList.add("hidden");
+
+        renderPassage();
+    }
+
+
+    function showMessage(text, className) {
+
+        const message =
+            document.getElementById("message");
+
+        message.textContent = text;
+
+        message.className = className;
+    }
+
+
+    /*
+     * ==========================================
+     * CHECK
+     * ==========================================
+     *
+     * A mark where there shouldn't be one is
+     * "wrong" and goes red. A missing mark
+     * isn't shown - only counted - so there
+     * is still something to find.
+     */
+
+    function plural(count, one, many) {
+
+        return `${count} ${count === 1 ? one : many}`;
+    }
+
+
+    function check() {
+
+        if (stage !== "play") {
+            return;
+        }
+
+        let wrong = 0;
+
+        let missing = 0;
+
+        wrongGaps = new Set();
+
+
+        passage.gaps.forEach(function (gap, i) {
+
+            const expected = expectedPart(i);
+
+            const got = placed[i];
+
+            if (got.mark !== expected.mark) {
+
+                if (got.mark) {
+
+                    wrong++;
+
+                    wrongGaps.add(i);
+                }
+
+                if (expected.mark) {
+                    missing++;
+                }
+            }
+
+            if (got.quote !== expected.quote) {
+
+                if (got.quote) {
+
+                    wrong++;
+
+                    wrongGaps.add(i);
+
+                } else {
+
+                    missing++;
+                }
+            }
+
+        });
+
+
+        /*
+         * ======================================
+         * CORRECT
+         * ======================================
+         */
+
+        if (wrong === 0 && missing === 0) {
+
+            playHappySound();
+
+            celebrateCorrectAnswer();
+
+            showMessage("Perfect! 🎉", "correct");
+
+            finish();
+
+            return;
+        }
+
+
+        /*
+         * ======================================
+         * NOT YET
+         * ======================================
+         */
+
+        playSadSound();
+
+        flashRed();
+
+        failedChecks++;
+
+        const problems = [];
+
+        if (wrong > 0) {
+            problems.push(
+                `${plural(wrong, "mark is", "marks are")} in the wrong place (in red)`
+            );
+        }
+
+        if (missing > 0) {
+            problems.push(
+                `${plural(missing, "mark is", "marks are")} missing`
+            );
+        }
+
+        showMessage(
+            `Nearly! ${problems.join(" and ")}.`,
+            "incorrect"
+        );
+
+        if (failedChecks >= SHOW_ME_AFTER) {
+
+            document.getElementById("showMeBtn").classList.remove("hidden");
+        }
+
+        renderPassage();
+    }
+
+
+    /*
+     * Fills in the right marks (in orange
+     * where they changed). The passage comes
+     * back a few passages later to try again.
+     */
+
+    function showMe() {
+
+        if (stage !== "play") {
+            return;
+        }
+
+        passage.gaps.forEach(function (gap, i) {
+
+            const expected = expectedPart(i);
+
+            if (
+                placed[i].mark !== expected.mark ||
+                placed[i].quote !== expected.quote
+            ) {
+                revealedGaps.add(i);
+            }
+
+            placed[i] = {
+                mark: expected.mark,
+                quote: expected.quote
+            };
+
+        });
+
+        wrongGaps = new Set();
+
+        queue.splice(
+            Math.min(queueIndex + 4, queue.length),
+            0,
+            passage
+        );
+
+        showMessage(
+            "Here's where they go - read it out loud!",
+            ""
+        );
+
+        finish();
+    }
+
+
+    function finish() {
+
+        stage = "done";
+
+        saveState();
+
+        document.getElementById("checkBtn").classList.add("hidden");
+
+        document.getElementById("clearBtn").classList.add("hidden");
+
+        document.getElementById("showMeBtn").classList.add("hidden");
+
+        document.getElementById("nextBtn").classList.remove("hidden");
+
+        renderPassage();
+    }
+
+
+    function clearMarks() {
+
+        if (stage !== "play") {
+            return;
+        }
+
+        placed = passage.gaps.map(function () {
+            return { mark: null, quote: false };
+        });
+
+        wrongGaps = new Set();
+
+        showMessage("", "");
+
+        renderPassage();
+    }
+
+
+    /*
+     * ==========================================
+     * LISTEN
+     * ==========================================
+     *
+     * Reads the whole passage out, so the
+     * pauses at full stops and commas can be
+     * heard. Tap again to stop.
+     */
+
+    function listen() {
+
+        if (speechSynthesis.speaking) {
+
+            stopListening();
+
+            return;
+        }
+
+        const speech =
+            new SpeechSynthesisUtterance(passage.text);
+
+        speech.lang = "en-GB";
+
+        speech.rate = 0.85;
+
+        speechSynthesis.speak(speech);
+    }
+
+
+    function stopListening() {
+
+        if ("speechSynthesis" in window) {
+            speechSynthesis.cancel();
+        }
+    }
+
+
+    /*
+     * ==========================================
+     * BUTTONS
+     * ==========================================
+     */
+
+    [
+        ["checkBtn", check],
+        ["listenBtn", listen],
+        ["clearBtn", clearMarks],
+        ["showMeBtn", showMe],
+        ["nextBtn", nextPassage]
+    ].forEach(function (pair) {
+
+        const button =
+            document.getElementById(pair[0]);
+
+        button.addEventListener("click", function () {
+
+            pair[1]();
+
+            button.blur();
+
+        });
+
+    });
+
+    if (!("speechSynthesis" in window)) {
+
+        document.getElementById("listenBtn").classList.add("hidden");
+    }
+
+
+    /*
+     * ==========================================
+     * KEYS
+     * ==========================================
+     *
+     * Enter:          Check, or Next when done
+     * . , ! " : ;     pick that mark
+     */
+
+    document.addEventListener(
+        "keydown",
+        function (event) {
+
+            if (stage === null) {
+                return;
+            }
+
+            if (event.key === "Enter") {
+
+                event.preventDefault();
+
+                if (stage === "play") {
+                    check();
+                } else {
+                    nextPassage();
+                }
+
+                return;
+            }
+
+            if (markInfo(event.key) && isSelected(event.key)) {
+
+                setBrush(event.key);
+            }
+
+        }
+    );
+
+
+    /*
+     * ==========================================
+     * START
+     * ==========================================
+     *
+     * Carries on with the saved passage if
+     * there is one.
+     */
+
+    renderMarkSelector();
+
+    updateMarkButtons();
+
+    if (!isSelected(brush)) {
+        brush = selectedMarkList()[0];
+    }
+
+    startRound(persistedState.passage);
+
+</script>
+
+</body>
+</html>

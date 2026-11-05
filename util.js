@@ -4,7 +4,8 @@
  *
  * Used by MissingNum.html, Muliplication.html,
  * Division.html, MultDivPractice.html,
- * MixedPractice.html and spelling.html (and
+ * MixedPractice.html, spelling.html and
+ * punctuation.html (and
  * maths.html for the answer box position
  * setting).
  * ==========================================
