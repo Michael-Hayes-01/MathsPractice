@@ -1,0 +1,1721 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Times Table Circle</title>
+
+    <style>
+        * {
+            box-sizing: border-box;
+        }
+
+        body {
+            font-family: Arial, sans-serif;
+            background: #f4f6f8;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            min-height: 100vh;
+            margin: 0;
+            transition: background-color 0.15s ease;
+            overflow-x: hidden;
+        }
+
+        /* =========================
+           GREEN FLASH - CORRECT
+           ========================= */
+
+        body.flash-green {
+            animation: greenFlash 1.6s ease-in-out 1;
+        }
+
+        @keyframes greenFlash {
+            0%, 100% {
+                background-color: #f4f6f8;
+            }
+
+            7.5% {
+                background-color: #32cd32;
+            }
+
+            15% {
+                background-color: #f4f6f8;
+            }
+
+            22.5% {
+                background-color: #32cd32;
+            }
+
+            30% {
+                background-color: #f4f6f8;
+            }
+
+            37.5% {
+                background-color: #32cd32;
+            }
+
+            45% {
+                background-color: #f4f6f8;
+            }
+
+            52.5% {
+                background-color: #32cd32;
+            }
+
+            60% {
+                background-color: #f4f6f8;
+            }
+
+            67.5% {
+                background-color: #32cd32;
+            }
+
+            75% {
+                background-color: #f4f6f8;
+            }
+
+            82.5% {
+                background-color: #32cd32;
+            }
+
+            90% {
+                background-color: #f4f6f8;
+            }
+        }
+
+        /* =========================
+           RED FLASH - WRONG
+           ========================= */
+
+        body.flash-red {
+            animation: redFlash 0.8s ease-in-out 1;
+        }
+
+        @keyframes redFlash {
+            0%, 100% {
+                background-color: #f4f6f8;
+            }
+
+            15% {
+                background-color: #ff3b30;
+            }
+
+            30% {
+                background-color: #f4f6f8;
+            }
+
+            45% {
+                background-color: #ff3b30;
+            }
+
+            60% {
+                background-color: #f4f6f8;
+            }
+        }
+
+        /* =========================
+           MAIN CONTAINER
+           ========================= */
+
+        .container {
+            background: white;
+            padding: 30px;
+            border-radius: 12px;
+            box-shadow: 0 4px 15px rgba(0, 0, 0, 0.1);
+            text-align: center;
+            width: 95%;
+            max-width: 700px;
+            position: relative;
+            z-index: 2;
+            margin-top: 60px;
+            margin-bottom: 20px;
+        }
+
+        h1 {
+            margin-bottom: 15px;
+            color: #333;
+            font-size: 28px;
+        }
+
+        /* =========================
+           TIMES TABLE SELECTOR
+           ========================= */
+
+        .table-label {
+            font-size: 18px;
+            font-weight: bold;
+            color: #555;
+            margin-bottom: 10px;
+        }
+
+        .table-selector {
+            display: flex;
+            justify-content: center;
+            flex-wrap: wrap;
+            gap: 5px;
+            margin-bottom: 20px;
+        }
+
+        .table-selector button {
+            width: 48px;
+            height: 42px;
+            border: 2px solid #333;
+            border-radius: 6px;
+            font-size: 17px;
+            font-weight: bold;
+            cursor: pointer;
+            background: #eee;
+            color: #333;
+        }
+
+        .table-selector button[data-table="any"] {
+            width: auto;
+            padding: 0 12px;
+        }
+
+        .table-selector button:hover {
+            background: #ddd;
+        }
+
+        .table-selector button.active {
+            background: #333;
+            color: white;
+        }
+
+        /* =========================
+           COLOUR SCHEME SELECTOR
+           ========================= */
+
+        .scheme-label {
+            font-size: 14px;
+            font-weight: bold;
+            color: #555;
+            margin-bottom: 6px;
+        }
+
+        .scheme-selector {
+            display: flex;
+            justify-content: center;
+            flex-wrap: wrap;
+            gap: 6px;
+            margin-bottom: 20px;
+        }
+
+        .scheme-btn {
+            padding: 6px 14px;
+            border: 2px solid #333;
+            border-radius: 6px;
+            font-size: 13px;
+            font-weight: bold;
+            cursor: pointer;
+            background: #eee;
+            color: #333;
+        }
+
+        .scheme-btn:hover {
+            background: #ddd;
+        }
+
+        .scheme-btn.active {
+            background: #333;
+            color: white;
+        }
+
+        /* =========================
+           SEGMENT SELECTOR
+           ========================= */
+
+        .segment-label {
+            font-size: 14px;
+            font-weight: bold;
+            color: #555;
+            margin-bottom: 6px;
+        }
+
+        .segment-selector {
+            display: flex;
+            justify-content: center;
+            flex-wrap: wrap;
+            gap: 6px;
+            margin-bottom: 20px;
+        }
+
+        .segment-btn {
+            width: 42px;
+            height: 38px;
+            border: 2px solid #333;
+            border-radius: 6px;
+            font-size: 16px;
+            font-weight: bold;
+            cursor: pointer;
+            background: #eee;
+            color: #333;
+        }
+
+        .segment-btn:hover {
+            background: #ddd;
+        }
+
+        .segment-btn.active {
+            background: #333;
+            color: white;
+        }
+
+        /* =========================
+           CIRCLE
+           ========================= */
+
+        .circle-container {
+            display: flex;
+            justify-content: center;
+            margin: 10px 0;
+        }
+
+        #circlesvg {
+            max-width: 420px;
+            width: 100%;
+            height: auto;
+        }
+
+        .segment-outer {
+            cursor: pointer;
+            transition: opacity 0.15s;
+        }
+
+        .segment-outer:hover {
+            opacity: 0.8;
+        }
+
+        .segment-outer.selected {
+            opacity: 0.7;
+        }
+
+        .segment-outer.correct-cell {
+            opacity: 1;
+        }
+
+        .cell-text {
+            font-family: Arial, sans-serif;
+            font-weight: bold;
+            pointer-events: none;
+            user-select: none;
+        }
+
+        /* =========================
+           ANSWER INPUT
+           ========================= */
+
+        .answer-section {
+            margin: 10px 0;
+            min-height: 50px;
+        }
+
+        .answer-section .answer-input {
+            width: 100px;
+            height: 50px;
+            font-size: 28px;
+            font-weight: bold;
+            text-align: center;
+            border: 2px solid #888;
+            border-radius: 6px;
+        }
+
+        .answer-section .answer-input:focus {
+            outline: none;
+            border-color: #333;
+        }
+
+        .answer-section .answer-input::-webkit-inner-spin-button,
+        .answer-section .answer-input::-webkit-outer-spin-button {
+            -webkit-appearance: none;
+            margin: 0;
+        }
+
+        .answer-label {
+            font-size: 16px;
+            color: #555;
+            margin-bottom: 6px;
+        }
+
+        /* =========================
+           ACTION BUTTONS
+           ========================= */
+
+        .actions {
+            margin-top: 10px;
+        }
+
+        .actions button {
+            padding: 13px 30px;
+            font-size: 18px;
+            border: none;
+            border-radius: 6px;
+            cursor: pointer;
+            margin: 8px;
+        }
+
+        #submitBtn {
+            background: #2e9e44;
+            color: white;
+        }
+
+        #submitBtn:hover {
+            background: #237a34;
+        }
+
+        #generateBtn {
+            background: #ddd;
+            color: #333;
+        }
+
+        #generateBtn:hover {
+            background: #ccc;
+        }
+
+        #generateBtn:disabled {
+            opacity: 0.5;
+            cursor: not-allowed;
+        }
+
+        /* =========================
+           MESSAGE
+           ========================= */
+
+        #message {
+            margin-top: 15px;
+            font-size: 22px;
+            font-weight: bold;
+            min-height: 28px;
+        }
+
+        .correct {
+            color: green;
+        }
+
+        .incorrect {
+            color: red;
+        }
+
+        /* =========================
+           FIREWORKS
+           ========================= */
+
+        #fireworks {
+            position: fixed;
+            inset: 0;
+            pointer-events: none;
+            z-index: 10;
+        }
+
+        .firework {
+            position: absolute;
+            width: 8px;
+            height: 8px;
+            border-radius: 50%;
+        }
+
+        .spark {
+            position: absolute;
+            left: 0;
+            top: 0;
+            width: 6px;
+            height: 22px;
+            border-radius: 50%;
+            transform-origin: 50% 100%;
+            animation: sparkFly 850ms ease-out forwards;
+        }
+
+        @keyframes sparkFly {
+            0% {
+                transform:
+                    rotate(var(--angle))
+                    translateY(0)
+                    scaleY(0.2);
+                opacity: 1;
+            }
+
+            70% {
+                opacity: 1;
+            }
+
+            100% {
+                transform:
+                    rotate(var(--angle))
+                    translateY(var(--distance))
+                    scaleY(1);
+                opacity: 0;
+            }
+        }
+
+        /* =========================
+           HOME BUTTON
+           ========================= */
+
+        .top-buttons {
+            position: fixed;
+            top: 15px;
+            left: 50%;
+            transform: translateX(-50%);
+            z-index: 5;
+            display: flex;
+            gap: 10px;
+        }
+
+        .home-button {
+            padding: 10px 16px;
+            border-radius: 8px;
+            background: #333;
+            color: white;
+            text-decoration: none;
+            font-size: 16px;
+            font-weight: bold;
+        }
+
+        .home-button:hover {
+            background: #555;
+        }
+
+        .home-button {
+            display: inline-flex;
+            align-items: center;
+            gap: 6px;
+        }
+
+        .nav-icon {
+            font-size: 26px;
+            line-height: 1;
+        }
+
+        /* =========================
+           MOBILE
+           ========================= */
+
+        @media (max-width: 600px) {
+
+            .container {
+                padding: 20px 10px;
+            }
+
+            h1 {
+                font-size: 22px;
+            }
+
+            .table-selector button {
+                width: 42px;
+                height: 38px;
+                font-size: 15px;
+            }
+
+            #circlesvg {
+                max-width: 340px;
+            }
+        }
+    </style>
+</head>
+
+<body>
+
+<!-- Back goes to the previous page, or up to
+     this page's menu if it was opened directly -->
+<div class="top-buttons">
+    <a
+            class="home-button"
+            href="maths.html"
+            onclick="if (document.referrer.startsWith(location.origin)) { history.back(); return false; }"
+    ><span class="nav-icon">⬅️</span> Back</a>
+    <a class="home-button" href="index.html"><span class="nav-icon">🏠</span> Home</a>
+</div>
+
+<div id="fireworks"></div>
+
+<div class="container">
+
+    <h1>Times Table Circle</h1>
+
+    <!-- =========================
+         TIMES TABLE
+         ========================= -->
+
+    <div class="table-label">
+        Choose times tables
+    </div>
+
+    <div class="table-selector">
+
+        <button data-table="2">2</button>
+        <button data-table="3" class="active">3</button>
+        <button data-table="4">4</button>
+        <button data-table="5">5</button>
+        <button data-table="6">6</button>
+        <button data-table="7">7</button>
+        <button data-table="8">8</button>
+        <button data-table="9">9</button>
+        <button data-table="10">10</button>
+        <button data-table="11">11</button>
+        <button data-table="12">12</button>
+        <button data-table="any">Any</button>
+
+    </div>
+
+    <!-- =========================
+         COLOUR SCHEME
+         ========================= -->
+
+    <div class="scheme-label">
+        Colour scheme
+    </div>
+
+    <div class="scheme-selector">
+
+        <button class="scheme-btn active" data-scheme="ocean">Ocean</button>
+        <button class="scheme-btn" data-scheme="sunset">Sunset</button>
+        <button class="scheme-btn" data-scheme="forest">Forest</button>
+        <button class="scheme-btn" data-scheme="candy">Candy</button>
+        <button class="scheme-btn" data-scheme="slate">Slate</button>
+        <button class="scheme-btn" data-scheme="rainbow">Rainbow</button>
+
+    </div>
+
+    <!-- =========================
+         segmentCount
+         ========================= -->
+
+    <div class="segment-label">
+        Segments
+    </div>
+
+    <div class="segment-selector">
+
+        <button class="segment-btn" data-segments="3">3</button>
+        <button class="segment-btn" data-segments="4">4</button>
+        <button class="segment-btn" data-segments="5">5</button>
+        <button class="segment-btn active" data-segments="6">6</button>
+        <button class="segment-btn" data-segments="7">7</button>
+        <button class="segment-btn" data-segments="8">8</button>
+
+    </div>
+
+    <!-- =========================
+         CIRCLE
+         ========================= -->
+
+    <div class="circle-container">
+        <svg id="circlesvg" viewBox="0 0 420 420"></svg>
+    </div>
+
+    <!-- =========================
+         ANSWER INPUT
+         ========================= -->
+
+    <div class="answer-section" id="answerSection">
+        <div class="answer-label" id="answerLabel">
+            Click a segment to answer
+        </div>
+    </div>
+
+    <!-- =========================
+         ACTIONS
+         ========================= -->
+
+    <div class="actions">
+
+        <button id="submitBtn">
+            Go!
+        </button>
+
+        <button id="generateBtn" disabled>
+            New Circle
+        </button>
+
+    </div>
+
+    <div id="message"></div>
+
+</div>
+
+
+<script src="util.js"></script>
+
+<script>
+
+    /*
+     * ==========================================
+     * CONSTANTS
+     * ==========================================
+     */
+
+    var segmentCount = 6;
+
+    var CENTER_X = 210;
+    var CENTER_Y = 210;
+
+    var INNER_R1 = 0;
+    var INNER_R2 = 60;
+    var MIDDLE_R1 = 62;
+    var MIDDLE_R2 = 120;
+    var OUTER_R1 = 122;
+    var OUTER_R2 = 195;
+
+
+    /*
+     * ==========================================
+     * COLOUR SCHEMES
+     * ==========================================
+     */
+
+    var COLOUR_SCHEMES = {
+        ocean: {
+            inner: "#1a73e8",
+            middle: "#4fc3f7",
+            outer: "#e1f5fe",
+            innerText: "#ffffff",
+            middleText: "#003366",
+            outerText: "#003366",
+            border: "#0d47a1"
+        },
+        sunset: {
+            inner: "#e65100",
+            middle: "#ff9800",
+            outer: "#fff3e0",
+            innerText: "#ffffff",
+            middleText: "#4e2700",
+            outerText: "#4e2700",
+            border: "#bf360c"
+        },
+        forest: {
+            inner: "#2e7d32",
+            middle: "#66bb6a",
+            outer: "#e8f5e9",
+            innerText: "#ffffff",
+            middleText: "#1b3d1e",
+            outerText: "#1b3d1e",
+            border: "#1b5e20"
+        },
+        candy: {
+            inner: "#ad1457",
+            middle: "#f48fb1",
+            outer: "#fce4ec",
+            innerText: "#ffffff",
+            middleText: "#4a0023",
+            outerText: "#4a0023",
+            border: "#880e4f"
+        },
+        slate: {
+            inner: "#37474f",
+            middle: "#78909c",
+            outer: "#eceff1",
+            innerText: "#ffffff",
+            middleText: "#ffffff",
+            outerText: "#263238",
+            border: "#263238"
+        },
+        rainbow: {
+            inner: "#7b1fa2",
+            middle: "#ff7043",
+            outer: "#fff9c4",
+            innerText: "#ffffff",
+            middleText: "#3e1a00",
+            outerText: "#4a148c",
+            border: "#4a148c"
+        }
+    };
+
+    var selectedScheme = "ocean";
+
+
+    /*
+     * ==========================================
+     * GAME STATE
+     * ==========================================
+     */
+
+    var selectedTables = [3];
+
+    var questions = [];
+    var userAnswers = [];
+    var selectedCell = -1;
+    var allSubmitted = false;
+    var lastEffectState = null;
+
+
+    /*
+     * ==========================================
+     * PERSISTED STATE
+     * ==========================================
+     */
+
+    var STORAGE_KEY = "timesTableCircleState";
+
+
+    function loadState() {
+
+        try {
+
+            var raw =
+                localStorage.getItem(STORAGE_KEY);
+
+            return raw ? JSON.parse(raw) : {};
+
+        } catch (e) {
+
+            return {};
+        }
+    }
+
+
+    function saveState() {
+
+        try {
+
+            localStorage.setItem(
+                STORAGE_KEY,
+                JSON.stringify({
+                    selectedTables: selectedTables,
+                    selectedScheme: selectedScheme,
+                    segmentCount: segmentCount
+                })
+            );
+
+        } catch (e) {}
+    }
+
+
+    var persistedState = loadState();
+
+    if (persistedState.selectedTables) {
+        selectedTables = persistedState.selectedTables;
+    }
+
+    if (persistedState.selectedScheme) {
+        selectedScheme = persistedState.selectedScheme;
+    }
+
+    if (persistedState.segmentCount >= 3 &&
+        persistedState.segmentCount <= 8) {
+        segmentCount = persistedState.segmentCount;
+    }
+
+
+    /*
+     * ==========================================
+     * SVG HELPERS
+     * ==========================================
+     */
+
+    function polarToXY(cx, cy, r, angleDeg) {
+
+        var rad = (angleDeg - 90) * Math.PI / 180;
+
+        return {
+            x: cx + r * Math.cos(rad),
+            y: cy + r * Math.sin(rad)
+        };
+    }
+
+
+    function arcPath(cx, cy, r1, r2, startAngle, endAngle) {
+
+        var outerStart = polarToXY(cx, cy, r2, startAngle);
+        var outerEnd = polarToXY(cx, cy, r2, endAngle);
+        var innerEnd = polarToXY(cx, cy, r1, endAngle);
+        var innerStart = polarToXY(cx, cy, r1, startAngle);
+
+        var largeArc = (endAngle - startAngle) > 180 ? 1 : 0;
+
+        if (r1 === 0) {
+
+            return [
+                "M", cx, cy,
+                "L", outerStart.x, outerStart.y,
+                "A", r2, r2, 0, largeArc, 1,
+                    outerEnd.x, outerEnd.y,
+                "Z"
+            ].join(" ");
+        }
+
+        return [
+            "M", outerStart.x, outerStart.y,
+            "A", r2, r2, 0, largeArc, 1,
+                outerEnd.x, outerEnd.y,
+            "L", innerEnd.x, innerEnd.y,
+            "A", r1, r1, 0, largeArc, 0,
+                innerStart.x, innerStart.y,
+            "Z"
+        ].join(" ");
+    }
+
+
+    function textPosition(cx, cy, r1, r2, startAngle, endAngle) {
+
+        var midAngle = (startAngle + endAngle) / 2;
+        var midR = (r1 + r2) / 2;
+
+        return polarToXY(cx, cy, midR, midAngle);
+    }
+
+
+    /*
+     * ==========================================
+     * PICK TIMES TABLE NUMBER
+     * ==========================================
+     */
+
+    function pickTable() {
+
+        if (selectedTables === "any") {
+
+            return Math.floor(Math.random() * 11) + 2;
+        }
+
+        return selectedTables[
+            Math.floor(Math.random() * selectedTables.length)
+        ];
+    }
+
+
+    /*
+     * ==========================================
+     * GENERATE QUESTIONS
+     * ==========================================
+     */
+
+    function generateQuestions() {
+
+        questions = [];
+        userAnswers = [];
+        selectedCell = -1;
+        allSubmitted = false;
+        lastEffectState = null;
+
+        document.getElementById("generateBtn").disabled = true;
+
+        var message = document.getElementById("message");
+        message.textContent = "";
+        message.className = "";
+
+        for (var i = 0; i < segmentCount; i++) {
+
+            var table = pickTable();
+            var other = Math.floor(Math.random() * 11) + 2;
+
+            questions.push({
+                inner: table,
+                middle: other,
+                answer: table * other
+            });
+
+            userAnswers.push(null);
+        }
+
+        drawCircle();
+
+        updateAnswerSection();
+    }
+
+
+    /*
+     * ==========================================
+     * DRAW CIRCLE
+     * ==========================================
+     */
+
+    function drawCircle() {
+
+        var svg = document.getElementById("circlesvg");
+        var scheme = COLOUR_SCHEMES[selectedScheme];
+        var angleStep = 360 / segmentCount;
+
+        var html = "";
+
+        for (var i = 0; i < segmentCount; i++) {
+
+            var startAngle = i * angleStep;
+            var endAngle = (i + 1) * angleStep;
+
+            /*
+             * Inner ring segment
+             */
+
+            var innerPath = arcPath(
+                CENTER_X, CENTER_Y,
+                INNER_R1, INNER_R2,
+                startAngle, endAngle
+            );
+
+            html +=
+                '<path d="' + innerPath + '" ' +
+                'fill="' + scheme.inner + '" ' +
+                'stroke="' + scheme.border + '" ' +
+                'stroke-width="2"/>';
+
+            var innerPos = textPosition(
+                CENTER_X, CENTER_Y,
+                INNER_R1, INNER_R2,
+                startAngle, endAngle
+            );
+
+            html +=
+                '<text x="' + innerPos.x + '" ' +
+                'y="' + innerPos.y + '" ' +
+                'text-anchor="middle" ' +
+                'dominant-baseline="central" ' +
+                'fill="' + scheme.innerText + '" ' +
+                'class="cell-text" ' +
+                'font-size="20">' +
+                questions[i].inner +
+                '</text>';
+
+
+            /*
+             * Middle ring segment
+             */
+
+            var middlePath = arcPath(
+                CENTER_X, CENTER_Y,
+                MIDDLE_R1, MIDDLE_R2,
+                startAngle, endAngle
+            );
+
+            html +=
+                '<path d="' + middlePath + '" ' +
+                'fill="' + scheme.middle + '" ' +
+                'stroke="' + scheme.border + '" ' +
+                'stroke-width="2"/>';
+
+            var middlePos = textPosition(
+                CENTER_X, CENTER_Y,
+                MIDDLE_R1, MIDDLE_R2,
+                startAngle, endAngle
+            );
+
+            html +=
+                '<text x="' + middlePos.x + '" ' +
+                'y="' + middlePos.y + '" ' +
+                'text-anchor="middle" ' +
+                'dominant-baseline="central" ' +
+                'fill="' + scheme.middleText + '" ' +
+                'class="cell-text" ' +
+                'font-size="18">' +
+                questions[i].middle +
+                '</text>';
+
+
+            /*
+             * Outer ring segment (answer)
+             */
+
+            var outerPath = arcPath(
+                CENTER_X, CENTER_Y,
+                OUTER_R1, OUTER_R2,
+                startAngle, endAngle
+            );
+
+            var outerFill = scheme.outer;
+            var extraClass = "segment-outer";
+
+            if (userAnswers[i] !== null &&
+                userAnswers[i] === questions[i].answer) {
+
+                outerFill = "#a5d6a7";
+                extraClass += " correct-cell";
+            }
+
+            if (i === selectedCell &&
+                !(userAnswers[i] !== null &&
+                  userAnswers[i] === questions[i].answer)) {
+
+                outerFill = "#ffe082";
+                extraClass += " selected";
+            }
+
+            html +=
+                '<path d="' + outerPath + '" ' +
+                'fill="' + outerFill + '" ' +
+                'stroke="' + scheme.border + '" ' +
+                'stroke-width="2" ' +
+                'class="' + extraClass + '" ' +
+                'data-cell="' + i + '"/>';
+
+            var outerPos = textPosition(
+                CENTER_X, CENTER_Y,
+                OUTER_R1, OUTER_R2,
+                startAngle, endAngle
+            );
+
+            var displayText = "";
+
+            if (userAnswers[i] !== null) {
+                displayText = userAnswers[i];
+            } else {
+                displayText = "?";
+            }
+
+            html +=
+                '<text x="' + outerPos.x + '" ' +
+                'y="' + outerPos.y + '" ' +
+                'text-anchor="middle" ' +
+                'dominant-baseline="central" ' +
+                'fill="' + scheme.outerText + '" ' +
+                'class="cell-text" ' +
+                'font-size="20" ' +
+                'pointer-events="none">' +
+                displayText +
+                '</text>';
+
+
+            /*
+             * Multiply sign between inner and
+             * middle rings
+             */
+
+            var signPos = textPosition(
+                CENTER_X, CENTER_Y,
+                INNER_R2, MIDDLE_R1,
+                startAngle, endAngle
+            );
+
+            html +=
+                '<text x="' + signPos.x + '" ' +
+                'y="' + signPos.y + '" ' +
+                'text-anchor="middle" ' +
+                'dominant-baseline="central" ' +
+                'fill="' + scheme.border + '" ' +
+                'class="cell-text" ' +
+                'font-size="10" ' +
+                'opacity="0.6">' +
+                '\u00D7' +
+                '</text>';
+
+
+            /*
+             * Equals sign between middle and
+             * outer rings
+             */
+
+            var eqPos = textPosition(
+                CENTER_X, CENTER_Y,
+                MIDDLE_R2, OUTER_R1,
+                startAngle, endAngle
+            );
+
+            html +=
+                '<text x="' + eqPos.x + '" ' +
+                'y="' + eqPos.y + '" ' +
+                'text-anchor="middle" ' +
+                'dominant-baseline="central" ' +
+                'fill="' + scheme.border + '" ' +
+                'class="cell-text" ' +
+                'font-size="10" ' +
+                'opacity="0.6">' +
+                '=' +
+                '</text>';
+        }
+
+        svg.innerHTML = html;
+
+
+        /*
+         * Attach click handlers to outer
+         * ring segments.
+         */
+
+        svg.querySelectorAll(".segment-outer")
+            .forEach(function(path) {
+
+                path.addEventListener(
+                    "click",
+                    function() {
+
+                        var cell =
+                            Number(path.dataset.cell);
+
+                        selectCell(cell);
+                    }
+                );
+            });
+    }
+
+
+    /*
+     * ==========================================
+     * SELECT CELL
+     * ==========================================
+     */
+
+    function selectCell(cell) {
+
+        if (allSubmitted) {
+            return;
+        }
+
+        /*
+         * Don't select already correct cells.
+         */
+
+        if (userAnswers[cell] !== null &&
+            userAnswers[cell] === questions[cell].answer) {
+
+            return;
+        }
+
+        selectedCell = cell;
+
+        drawCircle();
+
+        updateAnswerSection();
+    }
+
+
+    /*
+     * ==========================================
+     * UPDATE ANSWER SECTION
+     * ==========================================
+     */
+
+    function updateAnswerSection() {
+
+        var section =
+            document.getElementById("answerSection");
+
+        if (selectedCell === -1 || allSubmitted) {
+
+            section.innerHTML =
+                '<div class="answer-label" id="answerLabel">' +
+                (allSubmitted
+                    ? "All done!"
+                    : "Click a segment to answer") +
+                '</div>';
+
+            return;
+        }
+
+        var q = questions[selectedCell];
+
+        section.innerHTML =
+            '<div class="answer-label" id="answerLabel">' +
+            q.inner + ' &times; ' + q.middle + ' = ?' +
+            '</div>' +
+            '<input type="number" id="answer" ' +
+            'class="answer-input" ' +
+            'aria-label="Answer" ' +
+            'autocomplete="off">';
+
+        var input =
+            document.getElementById("answer");
+
+        if (userAnswers[selectedCell] !== null) {
+
+            input.value = userAnswers[selectedCell];
+        }
+
+        input.focus();
+
+        input.addEventListener("input", function() {
+
+            if (input.value.trim() !== "") {
+
+                userAnswers[selectedCell] =
+                    Number(input.value);
+
+                drawCircle();
+            }
+        });
+    }
+
+
+    /*
+     * ==========================================
+     * SUBMIT ALL ANSWERS
+     * ==========================================
+     */
+
+    function submitAnswers() {
+
+        if (allSubmitted) {
+
+            generateQuestions();
+
+            return;
+        }
+
+        var message =
+            document.getElementById("message");
+
+        /*
+         * Check if all cells have answers.
+         */
+
+        var unanswered = -1;
+
+        for (var i = 0; i < segmentCount; i++) {
+
+            if (userAnswers[i] === null) {
+
+                unanswered = i;
+
+                break;
+            }
+        }
+
+        if (unanswered !== -1) {
+
+            message.textContent =
+                "Please answer all segments.";
+
+            message.className = "incorrect";
+
+            selectCell(unanswered);
+
+            return;
+        }
+
+
+        /*
+         * Store the current input value for
+         * the selected cell.
+         */
+
+        var input =
+            document.getElementById("answer");
+
+        if (input && input.value.trim() !== "") {
+
+            userAnswers[selectedCell] =
+                Number(input.value);
+        }
+
+
+        /*
+         * Check answers.
+         */
+
+        var allCorrect = true;
+        var firstWrong = -1;
+
+        for (var j = 0; j < segmentCount; j++) {
+
+            if (userAnswers[j] !== questions[j].answer) {
+
+                allCorrect = false;
+
+                if (firstWrong === -1) {
+                    firstWrong = j;
+                }
+            }
+        }
+
+
+        /*
+         * Build a state string to detect
+         * re-submissions of the same answers.
+         */
+
+        var stateKey = userAnswers.join(",");
+
+
+        if (allCorrect) {
+
+            if (stateKey !== lastEffectState) {
+
+                lastEffectState = stateKey;
+
+                playHappySound();
+
+                celebrateCorrectAnswer();
+            }
+
+            message.textContent =
+                "All correct! 🎉";
+
+            message.className = "correct";
+
+            allSubmitted = true;
+            selectedCell = -1;
+
+            document.getElementById("generateBtn").disabled = false;
+
+            drawCircle();
+
+            updateAnswerSection();
+
+        } else {
+
+            if (stateKey !== lastEffectState) {
+
+                lastEffectState = stateKey;
+
+                playSadSound();
+
+                flashRed();
+            }
+
+            message.textContent =
+                "Some answers are wrong. Try again!";
+
+            message.className = "incorrect";
+
+            selectCell(firstWrong);
+        }
+    }
+
+
+    /*
+     * ==========================================
+     * UPDATE TABLE BUTTON HIGHLIGHTS
+     * ==========================================
+     */
+
+    function updateTableButtons() {
+
+        document
+            .querySelectorAll(".table-selector button")
+            .forEach(function(button) {
+
+                var table = button.dataset.table;
+
+                button.classList.toggle(
+                    "active",
+                    selectedTables === "any"
+                        ? table === "any"
+                        : selectedTables.includes(Number(table))
+                );
+            });
+    }
+
+
+    /*
+     * ==========================================
+     * TOGGLE TABLE
+     * ==========================================
+     */
+
+    function toggleTable(table) {
+
+        if (table === "any") {
+
+            selectedTables = "any";
+
+        } else if (selectedTables === "any") {
+
+            selectedTables = [table];
+
+        } else if (selectedTables.includes(table)) {
+
+            if (selectedTables.length === 1) {
+                return;
+            }
+
+            selectedTables =
+                selectedTables.filter(function(t) {
+                    return t !== table;
+                });
+
+        } else {
+
+            selectedTables =
+                selectedTables
+                    .concat(table)
+                    .sort(function(a, b) {
+                        return a - b;
+                    });
+        }
+
+        saveState();
+
+        updateTableButtons();
+
+        generateQuestions();
+    }
+
+
+    /*
+     * ==========================================
+     * UPDATE SCHEME BUTTON HIGHLIGHTS
+     * ==========================================
+     */
+
+    function updateSchemeButtons() {
+
+        document
+            .querySelectorAll(".scheme-btn")
+            .forEach(function(button) {
+
+                button.classList.toggle(
+                    "active",
+                    button.dataset.scheme === selectedScheme
+                );
+            });
+    }
+
+
+    /*
+     * ==========================================
+     * SET COLOUR SCHEME
+     * ==========================================
+     */
+
+    function setScheme(scheme) {
+
+        selectedScheme = scheme;
+
+        saveState();
+
+        updateSchemeButtons();
+
+        drawCircle();
+    }
+
+
+    /*
+     * ==========================================
+     * UPDATE SEGMENT BUTTON HIGHLIGHTS
+     * ==========================================
+     */
+
+    function updateSegmentButtons() {
+
+        document
+            .querySelectorAll(".segment-btn")
+            .forEach(function(button) {
+
+                button.classList.toggle(
+                    "active",
+                    Number(button.dataset.segments) === segmentCount
+                );
+            });
+    }
+
+
+    /*
+     * ==========================================
+     * SET SEGMENT COUNT
+     * ==========================================
+     */
+
+    function setSegmentCount(count) {
+
+        segmentCount = count;
+
+        saveState();
+
+        updateSegmentButtons();
+
+        generateQuestions();
+    }
+
+
+    /*
+     * ==========================================
+     * EVENT LISTENERS - TABLE BUTTONS
+     * ==========================================
+     */
+
+    document
+        .querySelectorAll(".table-selector button")
+        .forEach(function(button) {
+
+            button.addEventListener(
+                "click",
+                function() {
+
+                    var table =
+                        button.dataset.table === "any"
+                            ? "any"
+                            : Number(button.dataset.table);
+
+                    toggleTable(table);
+                }
+            );
+        });
+
+
+    /*
+     * ==========================================
+     * EVENT LISTENERS - SCHEME BUTTONS
+     * ==========================================
+     */
+
+    document
+        .querySelectorAll(".scheme-btn")
+        .forEach(function(button) {
+
+            button.addEventListener(
+                "click",
+                function() {
+
+                    setScheme(button.dataset.scheme);
+                }
+            );
+        });
+
+
+    /*
+     * ==========================================
+     * EVENT LISTENERS - SEGMENT BUTTONS
+     * ==========================================
+     */
+
+    document
+        .querySelectorAll(".segment-btn")
+        .forEach(function(button) {
+
+            button.addEventListener(
+                "click",
+                function() {
+
+                    setSegmentCount(
+                        Number(button.dataset.segments)
+                    );
+                }
+            );
+        });
+
+
+    /*
+     * ==========================================
+     * EVENT LISTENERS - SUBMIT / GENERATE
+     * ==========================================
+     */
+
+    document
+        .getElementById("submitBtn")
+        .addEventListener(
+            "click",
+            function() {
+
+                submitAnswers();
+            }
+        );
+
+
+    document
+        .getElementById("generateBtn")
+        .addEventListener(
+            "click",
+            function() {
+
+                generateQuestions();
+            }
+        );
+
+
+    /*
+     * ==========================================
+     * ENTER KEY
+     * ==========================================
+     *
+     * If a cell is selected and has a value,
+     * Enter moves to the next unanswered cell.
+     *
+     * If all cells are filled, Enter submits.
+     *
+     * After all correct, Enter generates new.
+     */
+
+    document.addEventListener(
+        "keydown",
+        function(event) {
+
+            if (event.key !== "Enter") {
+                return;
+            }
+
+            event.preventDefault();
+
+
+            if (allSubmitted) {
+
+                generateQuestions();
+
+                return;
+            }
+
+
+            /*
+             * Save the current input value.
+             */
+
+            var input =
+                document.getElementById("answer");
+
+            if (input &&
+                input.value.trim() !== "" &&
+                selectedCell !== -1) {
+
+                userAnswers[selectedCell] =
+                    Number(input.value);
+
+                drawCircle();
+            }
+
+
+            /*
+             * Find next unanswered cell.
+             */
+
+            var nextEmpty = -1;
+
+            for (var i = 1; i <= segmentCount; i++) {
+
+                var idx =
+                    (selectedCell + i) % segmentCount;
+
+                if (userAnswers[idx] === null) {
+
+                    nextEmpty = idx;
+
+                    break;
+                }
+
+                /*
+                 * Also consider wrong answers
+                 * as needing re-entry.
+                 */
+
+                if (userAnswers[idx] !== null &&
+                    userAnswers[idx] !== questions[idx].answer &&
+                    questions[idx]) {
+
+                    /*
+                     * Only jump to wrong cells
+                     * after a submit attempt.
+                     */
+                }
+            }
+
+
+            if (nextEmpty !== -1) {
+
+                selectCell(nextEmpty);
+
+            } else {
+
+                submitAnswers();
+            }
+        }
+    );
+
+
+    /*
+     * ==========================================
+     * START GAME
+     * ==========================================
+     */
+
+    (function startGame() {
+
+        updateTableButtons();
+
+        updateSchemeButtons();
+
+        updateSegmentButtons();
+
+        generateQuestions();
+
+    })();
+
+</script>
+
+</body>
+</html>
