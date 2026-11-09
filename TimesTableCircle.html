@@ -152,13 +152,15 @@
         .table-selector {
             display: flex;
             justify-content: center;
-            flex-wrap: wrap;
+            flex-wrap: nowrap;
             gap: 5px;
             margin-bottom: 20px;
         }
 
         .table-selector button {
-            width: 48px;
+            flex: 0 1 46px;
+            min-width: 0;
+            padding: 0;
             height: 42px;
             border: 2px solid #333;
             border-radius: 6px;
@@ -170,7 +172,7 @@
         }
 
         .table-selector button[data-table="any"] {
-            width: auto;
+            flex: 0 0 auto;
             padding: 0 12px;
         }
 
@@ -181,6 +183,18 @@
         .table-selector button.active {
             background: #333;
             color: white;
+        }
+
+        /* =========================
+           COLOUR SCHEME + SEGMENTS ROW
+           ========================= */
+
+        .options-row {
+            display: flex;
+            justify-content: center;
+            flex-wrap: wrap;
+            gap: 12px 24px;
+            margin-bottom: 17px;
         }
 
         /* =========================
@@ -198,12 +212,12 @@
             display: flex;
             justify-content: center;
             flex-wrap: wrap;
-            gap: 6px;
-            margin-bottom: 20px;
+            gap: 4px;
         }
 
         .scheme-btn {
-            padding: 6px 14px;
+            height: 38px;
+            padding: 0 7px;
             border: 2px solid #333;
             border-radius: 6px;
             font-size: 13px;
@@ -237,12 +251,12 @@
             display: flex;
             justify-content: center;
             flex-wrap: wrap;
-            gap: 6px;
-            margin-bottom: 20px;
+            gap: 4px;
         }
 
         .segment-btn {
-            width: 42px;
+            width: 32px;
+            padding: 0;
             height: 38px;
             border: 2px solid #333;
             border-radius: 6px;
@@ -269,7 +283,7 @@
         .circle-container {
             display: flex;
             justify-content: center;
-            margin: 10px 0;
+            margin: 0 0 17px;
         }
 
         #circlesvg {
@@ -306,9 +320,10 @@
            ANSWER INPUT
            ========================= */
 
+        /* min-height stops the page jumping when the answer box appears */
         .answer-section {
-            margin: 10px 0;
-            min-height: 50px;
+            margin: 4px 0 10px;
+            min-height: 82px;
         }
 
         .answer-section .answer-input {
@@ -343,7 +358,7 @@
            ========================= */
 
         .actions {
-            margin-top: 10px;
+            margin-top: 2px;
         }
 
         .actions button {
@@ -352,7 +367,7 @@
             border: none;
             border-radius: 6px;
             cursor: pointer;
-            margin: 8px;
+            margin: 0 8px 8px;
         }
 
         #submitBtn {
@@ -501,8 +516,12 @@
                 font-size: 22px;
             }
 
+            .table-selector {
+                flex-wrap: wrap;
+            }
+
             .table-selector button {
-                width: 42px;
+                flex: 0 0 42px;
                 height: 38px;
                 font-size: 15px;
             }
@@ -558,41 +577,53 @@
 
     </div>
 
-    <!-- =========================
-         COLOUR SCHEME
-         ========================= -->
+    <div class="options-row">
 
-    <div class="scheme-label">
-        Colour scheme
-    </div>
+        <!-- =========================
+             COLOUR SCHEME
+             ========================= -->
 
-    <div class="scheme-selector">
+        <div>
 
-        <button class="scheme-btn active" data-scheme="ocean">Ocean</button>
-        <button class="scheme-btn" data-scheme="sunset">Sunset</button>
-        <button class="scheme-btn" data-scheme="forest">Forest</button>
-        <button class="scheme-btn" data-scheme="candy">Candy</button>
-        <button class="scheme-btn" data-scheme="slate">Slate</button>
-        <button class="scheme-btn" data-scheme="rainbow">Rainbow</button>
+            <div class="scheme-label">
+                Colour scheme
+            </div>
 
-    </div>
+            <div class="scheme-selector">
 
-    <!-- =========================
-         segmentCount
-         ========================= -->
+                <button class="scheme-btn active" data-scheme="ocean">Ocean</button>
+                <button class="scheme-btn" data-scheme="sunset">Sunset</button>
+                <button class="scheme-btn" data-scheme="forest">Forest</button>
+                <button class="scheme-btn" data-scheme="candy">Candy</button>
+                <button class="scheme-btn" data-scheme="slate">Slate</button>
+                <button class="scheme-btn" data-scheme="rainbow">Rainbow</button>
 
-    <div class="segment-label">
-        Segments
-    </div>
+            </div>
 
-    <div class="segment-selector">
+        </div>
 
-        <button class="segment-btn" data-segments="3">3</button>
-        <button class="segment-btn" data-segments="4">4</button>
-        <button class="segment-btn" data-segments="5">5</button>
-        <button class="segment-btn active" data-segments="6">6</button>
-        <button class="segment-btn" data-segments="7">7</button>
-        <button class="segment-btn" data-segments="8">8</button>
+        <!-- =========================
+             segmentCount
+             ========================= -->
+
+        <div>
+
+            <div class="segment-label">
+                Segments
+            </div>
+
+            <div class="segment-selector">
+
+                <button class="segment-btn" data-segments="3">3</button>
+                <button class="segment-btn" data-segments="4">4</button>
+                <button class="segment-btn" data-segments="5">5</button>
+                <button class="segment-btn active" data-segments="6">6</button>
+                <button class="segment-btn" data-segments="7">7</button>
+                <button class="segment-btn" data-segments="8">8</button>
+
+            </div>
+
+        </div>
 
     </div>
 
@@ -601,17 +632,7 @@
          ========================= -->
 
     <div class="circle-container">
-        <svg id="circlesvg" viewBox="0 0 420 420"></svg>
-    </div>
-
-    <!-- =========================
-         ANSWER INPUT
-         ========================= -->
-
-    <div class="answer-section" id="answerSection">
-        <div class="answer-label" id="answerLabel">
-            Click a segment to answer
-        </div>
+        <svg id="circlesvg" viewBox="0 12 420 396"></svg>
     </div>
 
     <!-- =========================
@@ -628,6 +649,16 @@
             New Circle
         </button>
 
+    </div>
+
+    <!-- =========================
+         ANSWER INPUT
+         ========================= -->
+
+    <div class="answer-section" id="answerSection">
+        <div class="answer-label" id="answerLabel">
+            Click a segment to answer
+        </div>
     </div>
 
     <div id="message"></div>
@@ -894,10 +925,33 @@
         message.textContent = "";
         message.className = "";
 
+        /*
+         * Questions already in this circle. Keyed
+         * smallest number first, so 5x6 and 6x5
+         * count as the same question.
+         */
+        var used = {};
+
         for (var i = 0; i < segmentCount; i++) {
 
-            var table = pickTable();
-            var other = Math.floor(Math.random() * 11) + 2;
+            var table, other, key;
+
+            /*
+             * Always finishes: each table offers 11
+             * different questions and a circle has
+             * at most 8 segments.
+             */
+            do {
+
+                table = pickTable();
+                other = Math.floor(Math.random() * 11) + 2;
+
+                key = Math.min(table, other) + "x" +
+                    Math.max(table, other);
+
+            } while (used[key]);
+
+            used[key] = true;
 
             questions.push({
                 inner: table,

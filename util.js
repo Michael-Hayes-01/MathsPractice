@@ -91,7 +91,57 @@ function playRandomSound(sounds) {
 function playHappySound() {
 
     playRandomSound(HAPPY_SOUNDS);
+
+    incrementCorrectCounter();
 }
+
+
+/*
+ * ==========================================
+ * CORRECT ANSWER COUNTER
+ *
+ * Added below the buttons on every page with
+ * a Submit / Check button. Goes up with each
+ * happy sound and starts at zero whenever the
+ * page is opened.
+ * ==========================================
+ */
+
+let correctAnswerCount = 0;
+
+
+function incrementCorrectCounter() {
+
+    correctAnswerCount++;
+
+    const counter =
+        document.getElementById("correctCounter");
+
+    if (counter) {
+        counter.textContent = "Correct: " + correctAnswerCount;
+    }
+}
+
+
+(function addCorrectCounter() {
+
+    const submitButton =
+        document.querySelector("#submitBtn, #checkBtn");
+
+    if (!submitButton) {
+        return;
+    }
+
+    const counter = document.createElement("div");
+
+    counter.id = "correctCounter";
+    counter.textContent = "Correct: 0";
+    counter.style.cssText =
+        "margin-top: 4px; font-size: 18px; font-weight: bold; " +
+        "text-align: center; color: #237a34;";
+
+    submitButton.closest(".actions").after(counter);
+})();
 
 
 /*
