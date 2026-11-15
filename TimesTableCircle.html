@@ -1265,6 +1265,28 @@
 
         input.focus();
 
+        /*
+         * Stop the up/down arrow keys and the
+         * mouse wheel from nudging the number,
+         * which would let the user hunt for the
+         * answer by watching the cell turn green.
+         */
+
+        input.addEventListener("keydown", function(event) {
+
+            if (event.key === "ArrowUp" ||
+                event.key === "ArrowDown") {
+
+                event.preventDefault();
+            }
+        });
+
+        input.addEventListener("wheel", function(event) {
+
+            event.preventDefault();
+
+        }, { passive: false });
+
         input.addEventListener("input", function() {
 
             if (input.value.trim() !== "") {
