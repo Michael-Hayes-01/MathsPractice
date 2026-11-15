@@ -213,6 +213,14 @@ probably – Something that is likely to happen.
 experience – Something that happens to you.
 
 question – Something you ask to get information.
+
+said – Spoke or told someone something.
+
+where – Used to ask about or talk about a place.
+
+there – In or at that place.
+
+little – Small in size or amount.
 `);
 
 addWordSet("Tricky", `
