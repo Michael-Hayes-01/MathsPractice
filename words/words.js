@@ -183,6 +183,36 @@ weight – How heavy something is.
 learn – To gain knowledge or a new skill.
 
 earth – The planet we live on, or the soil beneath our feet.
+
+notice – To see or become aware of something.
+
+often – Many times; frequently.
+
+perhaps – Possibly; maybe.
+
+imagine – To make a picture in your mind.
+
+sentence – A group of words that makes sense.
+
+complete – Finished; having all its parts.
+
+difficult – Not easy to do.
+
+exercise – An activity to keep fit or practise a skill.
+
+surprise – Something unexpected.
+
+remember – To keep something in your mind.
+
+separate – Not joined together.
+
+knowledge – Information and understanding.
+
+probably – Something that is likely to happen.
+
+experience – Something that happens to you.
+
+question – Something you ask to get information.
 `);
 
 addWordSet("Tricky", `
