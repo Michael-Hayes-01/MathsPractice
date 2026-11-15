@@ -1753,8 +1753,13 @@
         const message =
             document.getElementById("message");
 
+        /*
+         * Trim whitespace and any trailing
+         * full stop(s) before checking.
+         */
+
         const attempt =
-            input.value.trim();
+            input.value.trim().replace(/\.+$/, "").trim();
 
 
         /*
